@@ -1,0 +1,59 @@
+{
+  "login": {
+    "username": "admin",
+    "password": "1234"
+  },
+  "sidebar": [
+    {
+      "id": 1,
+      "name": "Dashboard",
+      "icon": "MdDashboard",
+      "path": "/home"
+    },
+    {
+      "id": 2,
+      "name": "Buyer",
+      "icon": "MdPeople",
+      "subfields": [
+        { "name": "Add Buyer", "path": "/buyer/add" },
+        { "name": "List Buyer", "path": "/buyer/list" }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Commodity",
+      "icon": "MdCategory",
+      "subfields": [
+        { "name": "Add Commodity", "path": "/commodity/add" },
+        { "name": "List Commodity", "path": "/commodity/list" }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Purchaser",
+      "icon": "MdShoppingCart",
+      "subfields": [
+        { "name": "Add Purchaser", "path": "/purchaser/add" },
+        { "name": "List Purchaser", "path": "/purchaser/list" }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Unit",
+      "icon": "MdBuild",
+      "subfields": [
+        { "name": "Add Unit", "path": "/unit/add" },
+        { "name": "List Unit", "path": "/unit/list" }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Company Profile",
+      "icon": "MdAccountCircle",
+      "subfields": [
+        { "name": "Add Profile", "path": "/profile/add" },
+        { "name": "List Profile", "path": "/profile/list" }
+      ]
+    }
+  ]
+}

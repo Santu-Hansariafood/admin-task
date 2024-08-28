@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (max-width: 768px) {
+    .ml-64 {
+        margin-left: 0;
+    }
+}
+
+.sidebar {
+    width: 16rem;
+}
+
+.sidebar-hidden {
+    display: none;
+}
