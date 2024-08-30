@@ -17,7 +17,7 @@ import {
 
 const Sidebar = ({ onLogout }) => {
   const [activeMenu, setActiveMenu] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State to handle sidebar toggle
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const navigate = useNavigate();
 
   const icons = {
@@ -50,12 +50,15 @@ const Sidebar = ({ onLogout }) => {
         isSidebarOpen ? "w-64" : "w-16"
       } min-h-screen p-4 transition-width duration-300 relative`}
     >
+      {/* Sidebar toggle button */}
       <button
         onClick={toggleSidebar}
-        className="absolute top-4 right-4 text-white text-2xl focus:outline-none"
+        className="absolute top-4 right-4 text-white text-2xl focus:outline-none z-10"
       >
         {isSidebarOpen ? <MdClose /> : <MdMenu />}
       </button>
+
+      {/* Sidebar Title */}
       <h2
         className={`text-2xl font-bold mb-6 ${
           isSidebarOpen ? "block" : "hidden"
@@ -63,7 +66,9 @@ const Sidebar = ({ onLogout }) => {
       >
         Sidebar
       </h2>
-      <ul>
+
+      {/* Sidebar Menu Items */}
+      <ul className="mt-8">
         {sidebarData.sidebar.map((item) => (
           <li key={item.id} className="mb-4">
             <NavLink
@@ -96,14 +101,13 @@ const Sidebar = ({ onLogout }) => {
         ))}
       </ul>
 
+      {/* Logout Button - Always visible */}
       <button
         onClick={handleLogout}
-        className={`mt-4 p-2 flex items-center justify-center bg-red-600 hover:bg-red-700 rounded w-full text-center transition-colors duration-200 ${
-          isSidebarOpen ? "block" : "hidden"
-        }`}
+        className={`mt-4 p-2 flex items-center justify-center bg-red-600 hover:bg-red-700 rounded w-full text-center transition-colors duration-200`}
       >
         <MdExitToApp className="mr-2" />
-        <span>Logout</span>
+        <span className={`${isSidebarOpen ? "block" : "hidden"}`}>Logout</span>
       </button>
     </div>
   );
