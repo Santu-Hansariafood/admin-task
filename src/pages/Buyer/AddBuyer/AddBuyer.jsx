@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Sample data for state dropdown options
 const states = [
@@ -22,17 +25,30 @@ const AddBuyer = () => {
   const [date, setDate] = useState('');
   const [state, setState] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log({
+
+    const buyerData = {
       name,
-      selectedGroupOfCompany,
-      location,
+      groupOfCompany: selectedGroupOfCompany,
+      locations: location,
       productCapacity,
       date,
       state,
-    });
+    };
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/buyers', buyerData);
+      toast.success('Buyer added successfully!');
+      setName('');
+      setSelectedGroupOfCompany('');
+      setLocation([]);
+      setProductCapacity('');
+      setDate('');
+      setState('');
+    } catch (error) {
+      toast.error(`Error adding buyer: ${error.response?.data?.message || error.message}`);
+    }
   };
 
   // Handle change for adding a location
@@ -169,6 +185,7 @@ const AddBuyer = () => {
             Submit
           </button>
         </form>
+        <ToastContainer />
       </div>
     </div>
   );
