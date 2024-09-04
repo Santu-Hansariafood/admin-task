@@ -1,33 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AddCompanyProfile = () => {
-  const [companyName, setCompanyName] = useState('');
-  const [selectedState, setSelectedState] = useState('');
-  const [brokerageRate, setBrokerageRate] = useState('');
+  const [companyName, setCompanyName] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [brokerageRate, setBrokerageRate] = useState("");
 
-  // Mock data for states
   const states = [
-    { id: 1, name: 'California' },
-    { id: 2, name: 'Texas' },
-    { id: 3, name: 'New York' },
+    { id: 1, name: "California" },
+    { id: 2, name: "Texas" },
+    { id: 3, name: "New York" },
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log({
+
+    const companyProfileData = {
       companyName,
-      selectedState,
+      state: selectedState,
       brokerageRate,
-    });
+    };
+
+    try {
+      await axios.post(
+        "http://localhost:5000/api/company-profile",
+        companyProfileData
+      );
+      toast.success("Company profile added successfully!");
+      setCompanyName("");
+      setSelectedState("");
+      setBrokerageRate("");
+    } catch (error) {
+      toast.error(
+        `Error adding company profile: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
       <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-lg">
-        <h2 className="text-2xl font-bold mb-4 text-center">Add Company Profile</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">
+          Add Company Profile
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Company Name Input */}
           <div className="mb-4">
             <label className="block text-gray-700">Company Name</label>
             <input
@@ -39,8 +59,6 @@ const AddCompanyProfile = () => {
               required
             />
           </div>
-
-          {/* State Dropdown */}
           <div className="mb-4">
             <label className="block text-gray-700">State</label>
             <select
@@ -57,10 +75,10 @@ const AddCompanyProfile = () => {
               ))}
             </select>
           </div>
-
-          {/* Brokerage Rate Per Ton Input */}
           <div className="mb-4">
-            <label className="block text-gray-700">Brokerage Rate Per Ton</label>
+            <label className="block text-gray-700">
+              Brokerage Rate Per Ton
+            </label>
             <input
               type="number"
               value={brokerageRate}
@@ -78,6 +96,7 @@ const AddCompanyProfile = () => {
             Submit
           </button>
         </form>
+        <ToastContainer />
       </div>
     </div>
   );
