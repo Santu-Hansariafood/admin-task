@@ -1,85 +1,84 @@
 import React, { useState } from "react";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 
-// Mock data for unit list
-const units = [
-  {
-    id: 1,
-    unitName: "Unit A",
-    unitLocation: "Location A",
-    unitState: "California",
-    contactNumber: "123-456-7890",
-    contactPerson: "John Doe",
-  },
-  {
-    id: 2,
-    unitName: "Unit B",
-    unitLocation: "Location B",
-    unitState: "Texas",
-    contactNumber: "987-654-3210",
-    contactPerson: "Jane Smith",
-  },
-  // Add more unit data as needed
-];
+const ListLocation = () => {
+  const [locations, setLocations] = useState([
+    {
+      id: 1,
+      location: "Location 1",
+      address: "123 Main St",
+      state: "State 1",
+      district: "District 1",
+      pin: "123456",
+    },
+    {
+      id: 2,
+      location: "Location 2",
+      address: "456 Oak St",
+      state: "State 2",
+      district: "District 2",
+      pin: "654321",
+    },
+    // Add more location data here
+  ]);
 
-const ListUnit = () => {
   const handleView = (id) => {
-    alert(`Viewing unit with ID: ${id}`);
+    alert(`Viewing location with ID: ${id}`);
   };
 
   const handleEdit = (id) => {
-    alert(`Editing unit with ID: ${id}`);
+    alert(`Editing location with ID: ${id}`);
   };
 
   const handleDelete = (id) => {
-    // Implement delete logic here
-    alert(`Deleted unit with ID: ${id}`);
+    setLocations(locations.filter((location) => location.id !== id));
+    alert(`Deleted location with ID: ${id}`);
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-6xl bg-white shadow-md rounded p-6">
-        <h2 className="text-2xl font-bold mb-6 text-center">List Units</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">List Locations</h2>
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white">
             <thead>
               <tr>
                 <th className="w-12 px-4 py-2 text-left">No</th>
-                <th className="px-4 py-2 text-left">Unit Name</th>
                 <th className="px-4 py-2 text-left">Location</th>
+                <th className="px-4 py-2 text-left">Address</th>
                 <th className="px-4 py-2 text-left">State</th>
-                <th className="px-4 py-2 text-left">Contact Number</th>
-                <th className="px-4 py-2 text-left">Contact Person</th>
+                <th className="px-4 py-2 text-left">District</th>
+                <th className="px-4 py-2 text-left">Pin</th>
                 <th className="px-4 py-2 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {units.map((unit, index) => (
-                <tr key={unit.id} className="hover:bg-gray-100">
+              {locations.map((location, index) => (
+                <tr key={location.id} className="hover:bg-gray-100">
                   <td className="px-4 py-2">{index + 1}</td>
-                  <td className="px-4 py-2">{unit.unitName}</td>
-                  <td className="px-4 py-2">{unit.unitLocation}</td>
-                  <td className="px-4 py-2">{unit.unitState}</td>
-                  <td className="px-4 py-2">{unit.contactNumber}</td>
-                  <td className="px-4 py-2">{unit.contactPerson}</td>
+                  <td className="px-4 py-2">{location.location}</td>
+                  <td className="px-4 py-2">{location.address}</td>
+                  <td className="px-4 py-2">{location.state}</td>
+                  <td className="px-4 py-2">{location.district}</td>
+                  <td className="px-4 py-2">{location.pin}</td>
                   <td className="px-4 py-2">
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => handleView(unit.id)}
+                        onClick={() => handleView(location.id)}
                         className="bg-blue-500 text-white p-2 rounded hover:bg-blue-700 flex items-center"
                       >
                         <FaEye className="mr-1" />
                         View
                       </button>
                       <button
-                        onClick={() => handleEdit(unit.id)}
+                        onClick={() => handleEdit(location.id)}
                         className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-700 flex items-center"
                       >
                         <FaEdit className="mr-1" />
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(unit.id)}
+                        onClick={() => handleDelete(location.id)}
                         className="bg-red-500 text-white p-2 rounded hover:bg-red-700 flex items-center"
                       >
                         <FaTrash className="mr-1" />
@@ -97,4 +96,4 @@ const ListUnit = () => {
   );
 };
 
-export default ListUnit;
+export default ListLocation;

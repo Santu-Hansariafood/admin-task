@@ -39,6 +39,24 @@
     },
     {
       "id": 5,
+      "name": "Location",
+      "icon": "MdLocationOn",
+      "subfields": [
+        { "name": "Add Location", "path": "/location/add" },
+        { "name": "List Location", "path": "/location/list" }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Rate",
+      "icon": "MdAttachMoney",
+      "subfields": [
+        { "name": "Add Rate", "path": "/rate/add" },
+        { "name": "List Rate", "path": "/rate/list" }
+      ]
+    },
+    {
+      "id": 7,
       "name": "Unit",
       "icon": "MdBuild",
       "subfields": [
@@ -47,7 +65,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": 8,
       "name": "Company Profile",
       "icon": "MdAccountCircle",
       "subfields": [

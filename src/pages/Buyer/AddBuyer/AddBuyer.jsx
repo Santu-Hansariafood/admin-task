@@ -1,186 +1,210 @@
-import React, { useState } from "react";
-import Select from "react-select"; // Import react-select for multi-select dropdowns
-import { FaPlus, FaMinus } from "react-icons/fa"; // Import icons for adding/removing fields
+import React, { useState } from 'react';
+
+// Sample data for state dropdown options
+const states = [
+  { value: 'California', label: 'California' },
+  { value: 'Texas', label: 'Texas' },
+  { value: 'New York', label: 'New York' },
+];
+
+// Corrected group of company options
+const groupOfCompanies = [
+  { value: 'Group1', label: 'Group1' },
+  { value: 'Group2', label: 'Group2' },
+  { value: 'Group3', label: 'Group3' },
+];
+
+// Sample data for unit dropdown options
+const unitOptions = [
+  { value: 'Unit1', label: 'Unit1' },
+  { value: 'Unit2', label: 'Unit2' },
+  { value: 'Unit3', label: 'Unit3' },
+];
 
 const AddBuyer = () => {
-  const [buyerName, setBuyerName] = useState("");
-  const [buyerMobile, setBuyerMobile] = useState([""]);
-  const [buyerEmail, setBuyerEmail] = useState([""]);
-  const [buyerCompany, setBuyerCompany] = useState("");
-  const [selectedCommodities, setSelectedCommodities] = useState([]);
+  const [name, setName] = useState('');
+  const [selectedGroupOfCompany, setSelectedGroupOfCompany] = useState('');
+  const [location, setLocation] = useState('');
+  const [productCapacity, setProductCapacity] = useState('');
+  const [date, setDate] = useState('');
+  const [state, setState] = useState('');
+  const [units, setUnits] = useState(['']); // State to handle multiple units
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission, e.g., send data to the server
+    // Handle form submission logic here
     console.log({
-      buyerName,
-      buyerMobile,
-      buyerEmail,
-      buyerCompany,
-      selectedCommodities: selectedCommodities.map((commodity) => commodity.value),
+      name,
+      selectedGroupOfCompany,
+      location,
+      productCapacity,
+      date,
+      state,
+      units,
     });
   };
 
-  const companies = ["Company A", "Company B", "Company C"];
-  const commodities = [
-    { value: "Commodity 1", label: "Commodity 1" },
-    { value: "Commodity 2", label: "Commodity 2" },
-    { value: "Commodity 3", label: "Commodity 3" },
-  ];
-
-  const handleAddMobile = () => {
-    setBuyerMobile([...buyerMobile, ""]);
+  // Function to handle adding a new unit
+  const addUnit = () => {
+    setUnits([...units, '']);
   };
 
-  const handleRemoveMobile = (index) => {
-    const newMobileNumbers = buyerMobile.filter((_, i) => i !== index);
-    setBuyerMobile(newMobileNumbers);
+  // Function to handle removing a unit
+  const removeUnit = (index) => {
+    setUnits(units.filter((_, i) => i !== index));
   };
 
-  const handleMobileChange = (value, index) => {
-    const newMobileNumbers = [...buyerMobile];
-    newMobileNumbers[index] = value;
-    setBuyerMobile(newMobileNumbers);
+  // Function to handle unit change
+  const handleUnitChange = (value, index) => {
+    const newUnits = [...units];
+    newUnits[index] = value;
+    setUnits(newUnits);
   };
 
-  const handleAddEmail = () => {
-    setBuyerEmail([...buyerEmail, ""]);
-  };
-
-  const handleRemoveEmail = (index) => {
-    const newEmails = buyerEmail.filter((_, i) => i !== index);
-    setBuyerEmail(newEmails);
-  };
-
-  const handleEmailChange = (value, index) => {
-    const newEmails = [...buyerEmail];
-    newEmails[index] = value;
-    setBuyerEmail(newEmails);
+  // Get available unit options, excluding already selected units
+  const getAvailableUnitOptions = (index) => {
+    const selectedUnits = units.filter((unit, i) => i !== index);
+    return unitOptions.filter((unit) => !selectedUnits.includes(unit.value));
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-md shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Add Buyer</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-700">Buyer Name</label>
-          <input
-            type="text"
-            value={buyerName}
-            onChange={(e) => setBuyerName(e.target.value)}
-            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
-            placeholder="Enter buyer name"
-            required
-          />
-        </div>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-lg bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold mb-4 text-center">Add Buyer</h2>
+        <form onSubmit={handleSubmit}>
+          {/* Name Input */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              placeholder="Enter Name"
+              required
+            />
+          </div>
 
-        {/* Multiple Mobile Numbers */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Buyer Mobile</label>
-          {buyerMobile.map((mobile, index) => (
-            <div key={index} className="flex items-center mb-2">
-              <input
-                type="text"
-                value={mobile}
-                onChange={(e) => handleMobileChange(e.target.value, index)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
-                placeholder="Enter buyer mobile"
-                required
-              />
-              <div className="ml-2 flex">
-                <button
-                  type="button"
-                  onClick={() => handleAddMobile()}
-                  className="text-green-600 hover:text-green-800 mr-2"
+          {/* Group of Company Dropdown */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Group of Company</label>
+            <select
+              value={selectedGroupOfCompany}
+              onChange={(e) => setSelectedGroupOfCompany(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              required
+            >
+              <option value="">Select Group</option>
+              {groupOfCompanies.map((group) => (
+                <option key={group.value} value={group.value}>
+                  {group.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Location Input */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Location</label>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              placeholder="Enter Location"
+              required
+            />
+          </div>
+
+          {/* State Dropdown */}
+          <div className="mb-4">
+            <label className="block text-gray-700">State</label>
+            <select
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              required
+            >
+              <option value="">Select State</option>
+              {states.map((state) => (
+                <option key={state.value} value={state.value}>
+                  {state.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Unit Dropdowns */}
+          {units.map((unit, index) => (
+            <div className="mb-4" key={index}>
+              <label className="block text-gray-700">Unit {index + 1}</label>
+              <div className="flex">
+                <select
+                  value={unit}
+                  onChange={(e) => handleUnitChange(e.target.value, index)}
+                  className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  required
                 >
-                  <FaPlus />
-                </button>
-                {buyerMobile.length > 1 && (
+                  <option value="">Select Unit</option>
+                  {getAvailableUnitOptions(index).map((unitOption) => (
+                    <option key={unitOption.value} value={unitOption.value}>
+                      {unitOption.label}
+                    </option>
+                  ))}
+                </select>
+                {index > 0 && (
                   <button
                     type="button"
-                    onClick={() => handleRemoveMobile(index)}
-                    className="text-red-600 hover:text-red-800"
+                    onClick={() => removeUnit(index)}
+                    className="ml-2 text-red-500 hover:text-red-700"
                   >
-                    <FaMinus />
+                    Remove
                   </button>
                 )}
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Multiple Emails */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Buyer Email</label>
-          {buyerEmail.map((email, index) => (
-            <div key={index} className="flex items-center mb-2">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => handleEmailChange(e.target.value, index)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
-                placeholder="Enter buyer email"
-                required
-              />
-              <div className="ml-2 flex">
-                <button
-                  type="button"
-                  onClick={() => handleAddEmail()}
-                  className="text-green-600 hover:text-green-800 mr-2"
-                >
-                  <FaPlus />
-                </button>
-                {buyerEmail.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveEmail(index)}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    <FaMinus />
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700">Buyer Company</label>
-          <select
-            value={buyerCompany}
-            onChange={(e) => setBuyerCompany(e.target.value)}
-            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
-            required
+          <button
+            type="button"
+            onClick={addUnit}
+            className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 transition-colors mb-4"
           >
-            <option value="">Select a company</option>
-            {companies.map((company, index) => (
-              <option key={index} value={company}>
-                {company}
-              </option>
-            ))}
-          </select>
-        </div>
+            Add Another Unit
+          </button>
 
-        {/* Multi-select for Commodities */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Commodity</label>
-          <Select
-            options={commodities}
-            isMulti
-            value={selectedCommodities}
-            onChange={setSelectedCommodities}
-            className="w-full mt-1"
-            placeholder="Select Commodities"
-          />
-        </div>
+          {/* Product Capacity Input */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Product Capacity</label>
+            <input
+              type="text"
+              value={productCapacity}
+              onChange={(e) => setProductCapacity(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              placeholder="Enter Product Capacity"
+              required
+            />
+          </div>
 
-        <button
-          type="submit"
-          className="w-full px-4 py-2 mt-4 text-white bg-blue-600 rounded-md hover:bg-blue-700"
-        >
-          Submit
-        </button>
-      </form>
+          {/* Date Picker */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition-colors"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

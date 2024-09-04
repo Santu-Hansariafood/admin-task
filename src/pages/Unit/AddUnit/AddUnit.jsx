@@ -1,23 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 // Mock data for states dropdown
 const states = [
-  { id: 1, name: 'California' },
-  { id: 2, name: 'Texas' },
-  { id: 3, name: 'New York' },
+  { id: 1, name: "California" },
+  { id: 2, name: "Texas" },
+  { id: 3, name: "New York" },
   // Add more states as needed
 ];
 
 const AddUnit = () => {
-  const [unitName, setUnitName] = useState('');
-  const [unitLocation, setUnitLocation] = useState('');
-  const [unitState, setUnitState] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-  const [contactPerson, setContactPerson] = useState('');
+  const [unitName, setUnitName] = useState("");
+  const [unitLocation, setUnitLocation] = useState("");
+  const [unitState, setUnitState] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [contactPerson, setContactPerson] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({ unitName, unitLocation, unitState, contactNumber, contactPerson });
+    console.log({
+      unitName,
+      unitLocation,
+      unitState,
+      contactNumber,
+      contactPerson,
+    });
   };
 
   return (
@@ -33,7 +39,7 @@ const AddUnit = () => {
               onChange={(e) => setUnitName(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
-              placeholder='Added Unit Name'
+              placeholder="Added Unit Name"
             />
           </div>
           <div className="mb-4">
@@ -44,7 +50,7 @@ const AddUnit = () => {
               onChange={(e) => setUnitLocation(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
-              placeholder='Added Location'
+              placeholder="Added Location"
             />
           </div>
           <div className="mb-4">
@@ -71,7 +77,7 @@ const AddUnit = () => {
               onChange={(e) => setContactNumber(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
-              placeholder='Added Contact number'
+              placeholder="Added Contact number"
             />
           </div>
           <div className="mb-4">
@@ -82,7 +88,7 @@ const AddUnit = () => {
               onChange={(e) => setContactPerson(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
-              placeholder='Added Contact Person Name'
+              placeholder="Added Contact Person Name"
             />
           </div>
           <button
