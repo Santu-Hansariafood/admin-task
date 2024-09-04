@@ -55,15 +55,7 @@
         { "name": "List Rate", "path": "/rate/list" }
       ]
     },
-    {
-      "id": 7,
-      "name": "Unit",
-      "icon": "MdBuild",
-      "subfields": [
-        { "name": "Add Unit", "path": "/unit/add" },
-        { "name": "List Unit", "path": "/unit/list" }
-      ]
-    },
+    
     {
       "id": 8,
       "name": "Company Profile",

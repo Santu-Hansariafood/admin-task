@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 
 const AddRate = () => {
-  const [date, setDate] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [rate, setRate] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Date:", date, "Rate:", rate);
+    console.log("From Date:", fromDate, "To Date:", toDate, "Rate:", rate);
     // Add your form submission logic here
-    setDate("");
+    setFromDate("");
+    setToDate("");
     setRate("");
   };
 
@@ -18,14 +20,27 @@ const AddRate = () => {
         <h2 className="text-2xl font-bold mb-6 text-center">Add Rate</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="date" className="block text-gray-700 text-sm font-bold mb-2">
-              Date:
+            <label htmlFor="fromDate" className="block text-gray-700 text-sm font-bold mb-2">
+              From Date:
             </label>
             <input
               type="date"
-              id="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
+              id="fromDate"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="toDate" className="block text-gray-700 text-sm font-bold mb-2">
+              To Date:
+            </label>
+            <input
+              type="date"
+              id="toDate"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
             />

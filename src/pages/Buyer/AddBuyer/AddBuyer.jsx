@@ -14,21 +14,13 @@ const groupOfCompanies = [
   { value: 'Group3', label: 'Group3' },
 ];
 
-// Sample data for unit dropdown options
-const unitOptions = [
-  { value: 'Unit1', label: 'Unit1' },
-  { value: 'Unit2', label: 'Unit2' },
-  { value: 'Unit3', label: 'Unit3' },
-];
-
 const AddBuyer = () => {
   const [name, setName] = useState('');
   const [selectedGroupOfCompany, setSelectedGroupOfCompany] = useState('');
-  const [location, setLocation] = useState('');
+  const [location, setLocation] = useState([]); // State for multiple selected locations
   const [productCapacity, setProductCapacity] = useState('');
   const [date, setDate] = useState('');
   const [state, setState] = useState('');
-  const [units, setUnits] = useState(['']); // State to handle multiple units
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -40,31 +32,21 @@ const AddBuyer = () => {
       productCapacity,
       date,
       state,
-      units,
     });
   };
 
-  // Function to handle adding a new unit
-  const addUnit = () => {
-    setUnits([...units, '']);
+  // Handle change for adding a location
+  const handleAddLocation = (e) => {
+    const selectedValue = e.target.value;
+    if (selectedValue && !location.includes(selectedValue)) {
+      setLocation([...location, selectedValue]);
+    }
+    e.target.value = ''; // Reset dropdown after selection
   };
 
-  // Function to handle removing a unit
-  const removeUnit = (index) => {
-    setUnits(units.filter((_, i) => i !== index));
-  };
-
-  // Function to handle unit change
-  const handleUnitChange = (value, index) => {
-    const newUnits = [...units];
-    newUnits[index] = value;
-    setUnits(newUnits);
-  };
-
-  // Get available unit options, excluding already selected units
-  const getAvailableUnitOptions = (index) => {
-    const selectedUnits = units.filter((unit, i) => i !== index);
-    return unitOptions.filter((unit) => !selectedUnits.includes(unit.value));
+  // Function to remove a location
+  const handleRemoveLocation = (locationToRemove) => {
+    setLocation(location.filter(loc => loc !== locationToRemove));
   };
 
   return (
@@ -103,17 +85,38 @@ const AddBuyer = () => {
             </select>
           </div>
 
-          {/* Location Input */}
+          {/* Location Dropdown */}
           <div className="mb-4">
             <label className="block text-gray-700">Location</label>
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
+            <select
+              onChange={handleAddLocation}
               className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
-              placeholder="Enter Location"
-              required
-            />
+            >
+              <option value="">Select Location</option>
+              {states.map((state) => (
+                <option key={state.value} value={state.value}>
+                  {state.label}
+                </option>
+              ))}
+            </select>
+            {/* Display selected locations as tags */}
+            <div className="mt-2 flex flex-wrap">
+              {location.map((loc) => (
+                <div
+                  key={loc}
+                  className="bg-blue-100 text-blue-800 font-semibold py-1 px-3 rounded-full m-1 flex items-center"
+                >
+                  <span>{loc}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveLocation(loc)}
+                    className="ml-2 text-red-600 hover:text-red-800"
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* State Dropdown */}
@@ -133,44 +136,6 @@ const AddBuyer = () => {
               ))}
             </select>
           </div>
-
-          {/* Unit Dropdowns */}
-          {units.map((unit, index) => (
-            <div className="mb-4" key={index}>
-              <label className="block text-gray-700">Unit {index + 1}</label>
-              <div className="flex">
-                <select
-                  value={unit}
-                  onChange={(e) => handleUnitChange(e.target.value, index)}
-                  className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  required
-                >
-                  <option value="">Select Unit</option>
-                  {getAvailableUnitOptions(index).map((unitOption) => (
-                    <option key={unitOption.value} value={unitOption.value}>
-                      {unitOption.label}
-                    </option>
-                  ))}
-                </select>
-                {index > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => removeUnit(index)}
-                    className="ml-2 text-red-500 hover:text-red-700"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={addUnit}
-            className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 transition-colors mb-4"
-          >
-            Add Another Unit
-          </button>
 
           {/* Product Capacity Input */}
           <div className="mb-4">
