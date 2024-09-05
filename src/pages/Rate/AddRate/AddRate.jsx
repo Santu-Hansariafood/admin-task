@@ -1,17 +1,42 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AddRate = () => {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [rate, setRate] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("From Date:", fromDate, "To Date:", toDate, "Rate:", rate);
-    // Add your form submission logic here
-    setFromDate("");
-    setToDate("");
-    setRate("");
+
+    try {
+      // Validate form inputs
+      if (!fromDate || !toDate || !rate) {
+        toast.error("Please fill in all the fields.");
+        return;
+      }
+
+      // Call the API to add a new rate
+      const response = await axios.post("http://localhost:5000/api/rates", {
+        fromDate,
+        toDate,
+        rate,
+      });
+
+      // If successful, show success message
+      toast.success("Rate added successfully!");
+
+      // Clear form fields
+      setFromDate("");
+      setToDate("");
+      setRate("");
+    } catch (error) {
+      // Show error message if something goes wrong
+      const errorMessage = error.response?.data?.message || "Failed to add rate";
+      toast.error(errorMessage);
+    }
   };
 
   return (
@@ -20,7 +45,10 @@ const AddRate = () => {
         <h2 className="text-2xl font-bold mb-6 text-center">Add Rate</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="fromDate" className="block text-gray-700 text-sm font-bold mb-2">
+            <label
+              htmlFor="fromDate"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
               From Date:
             </label>
             <input
@@ -33,7 +61,10 @@ const AddRate = () => {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="toDate" className="block text-gray-700 text-sm font-bold mb-2">
+            <label
+              htmlFor="toDate"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
               To Date:
             </label>
             <input
@@ -46,7 +77,10 @@ const AddRate = () => {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="rate" className="block text-gray-700 text-sm font-bold mb-2">
+            <label
+              htmlFor="rate"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
               Rate:
             </label>
             <input
@@ -66,6 +100,7 @@ const AddRate = () => {
             Submit
           </button>
         </form>
+        <ToastContainer />
       </div>
     </div>
   );
