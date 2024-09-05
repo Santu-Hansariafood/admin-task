@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,6 +11,50 @@ const AddPurchaser = () => {
     item: "",
     phoneNumber: "",
   });
+
+  const [commodities, setCommodities] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [locations, setLocations] = useState([]);
+
+  useEffect(() => {
+    const fetchCommodities = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/commodities"
+        );
+        setCommodities(response.data);
+      } catch (error) {
+        console.error("Error fetching commodities:", error);
+        toast.error("Failed to load commodities.");
+      }
+    };
+
+    const fetchCompanies = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/company-profile"
+        );
+        setCompanies(response.data);
+      } catch (error) {
+        console.error("Error fetching companies:", error);
+        toast.error("Failed to load companies.");
+      }
+    };
+
+    const fetchLocations = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/locations");
+        setLocations(response.data);
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+        toast.error("Failed to load locations.");
+      }
+    };
+
+    fetchCommodities();
+    fetchCompanies();
+    fetchLocations();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -72,9 +116,11 @@ const AddPurchaser = () => {
             required
           >
             <option value="">Select Company</option>
-            <option value="Company A">Company A</option>
-            <option value="Company B">Company B</option>
-            <option value="Company C">Company C</option>
+            {companies.map((company) => (
+              <option key={company._id} value={company.companyName}>
+                {company.companyName} - {company.state}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -88,12 +134,16 @@ const AddPurchaser = () => {
             required
           >
             <option value="">Select Location</option>
-            <option value="Location A">Location A</option>
-            <option value="Location B">Location B</option>
-            <option value="Location C">Location C</option>
+            {locations.map((location) => (
+              <option key={location._id} value={location.location}>
+                {location.location} {location.district}, {location.state},{" "}
+                {location.pin}
+              </option>
+            ))}
           </select>
         </div>
 
+        {/* Item Dropdown */}
         <div className="mb-4">
           <label className="block text-gray-700">Item</label>
           <select
@@ -104,8 +154,11 @@ const AddPurchaser = () => {
             required
           >
             <option value="">Select Item</option>
-            <option value="Maize">Maize</option>
-            <option value="Soya">Soya</option>
+            {commodities.map((commodity) => (
+              <option key={commodity._id} value={commodity.commodityName}>
+                {commodity.commodityName}
+              </option>
+            ))}
           </select>
         </div>
 

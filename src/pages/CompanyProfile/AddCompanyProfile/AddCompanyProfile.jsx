@@ -1,18 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import stateDistData from "../../../data/state-dist.json";
 
 const AddCompanyProfile = () => {
   const [companyName, setCompanyName] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [brokerageRate, setBrokerageRate] = useState("");
+  const [selectedGroup, setSelectedGroup] = useState("");
+  const [groupOptions, setGroupOptions] = useState([]);
 
-  const states = [
-    { id: 1, name: "California" },
-    { id: 2, name: "Texas" },
-    { id: 3, name: "New York" },
-  ];
+  useEffect(() => {
+    const fetchGroupOptions = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/group-of-company"
+        );
+        setGroupOptions(response.data.data);
+      } catch (error) {
+        toast.error("Failed to fetch group of company options");
+      }
+    };
+    fetchGroupOptions();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,6 +32,7 @@ const AddCompanyProfile = () => {
       companyName,
       state: selectedState,
       brokerageRate,
+      groupOfCompany: selectedGroup,
     };
 
     try {
@@ -32,6 +44,7 @@ const AddCompanyProfile = () => {
       setCompanyName("");
       setSelectedState("");
       setBrokerageRate("");
+      setSelectedGroup("");
     } catch (error) {
       toast.error(
         `Error adding company profile: ${
@@ -59,6 +72,7 @@ const AddCompanyProfile = () => {
               required
             />
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700">State</label>
             <select
@@ -68,13 +82,14 @@ const AddCompanyProfile = () => {
               required
             >
               <option value="">Select State</option>
-              {states.map((state) => (
-                <option key={state.id} value={state.name}>
+              {stateDistData.map((state) => (
+                <option key={state.name} value={state.name}>
                   {state.name}
                 </option>
               ))}
             </select>
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700">
               Brokerage Rate Per Ton
@@ -87,6 +102,22 @@ const AddCompanyProfile = () => {
               placeholder="Enter Brokerage Rate"
               required
             />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Group of Company</label>
+            <select
+              value={selectedGroup}
+              onChange={(e) => setSelectedGroup(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              required
+            >
+              <option value="">Select Group of Company</option>
+              {groupOptions.map((group) => (
+                <option key={group._id} value={group.name}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <button

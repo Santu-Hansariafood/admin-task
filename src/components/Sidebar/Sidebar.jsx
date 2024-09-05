@@ -31,7 +31,7 @@ const Sidebar = ({ onLogout }) => {
     MdBuild: <MdBuild />,
     MdAccountCircle: <MdAccountCircle />,
     MdLocationOn: <MdLocationOn />,
-    MdAttachMoney: <MdAttachMoney />
+    MdAttachMoney: <MdAttachMoney />,
   };
 
   const handleLogout = () => {
@@ -49,7 +49,11 @@ const Sidebar = ({ onLogout }) => {
   };
 
   return (
-    <div className={`flex ${isSidebarOpen ? "w-64" : "w-16"} bg-black text-white min-h-screen transition-width duration-300 relative`}>
+    <div
+      className={`flex ${
+        isSidebarOpen ? "w-64" : "w-16"
+      } bg-black text-white min-h-screen transition-width duration-300 relative`}
+    >
       <div className="p-4">
         <button
           onClick={toggleSidebar}
@@ -57,7 +61,11 @@ const Sidebar = ({ onLogout }) => {
         >
           {isSidebarOpen ? <MdClose /> : <MdMenu />}
         </button>
-        <h2 className={`text-2xl font-bold mb-6 ${isSidebarOpen ? "block" : "hidden"}`}>
+        <h2
+          className={`text-2xl font-bold mb-6 ${
+            isSidebarOpen ? "block" : "hidden"
+          }`}
+        >
           Admin
         </h2>
         <ul className="mt-8">
@@ -69,7 +77,9 @@ const Sidebar = ({ onLogout }) => {
                 onClick={() => toggleSubMenu(item.id)}
               >
                 <span className="mr-3 text-xl">{icons[item.icon]}</span>
-                <span className={`${isSidebarOpen ? "block" : "hidden"}`}>{item.name}</span>
+                <span className={`${isSidebarOpen ? "block" : "hidden"}`}>
+                  {item.name}
+                </span>
               </NavLink>
               {activeMenu === item.id && item.subfields && isSidebarOpen && (
                 <ul className="ml-4">
@@ -95,7 +105,9 @@ const Sidebar = ({ onLogout }) => {
           className={`mt-4 p-2 flex items-center justify-center bg-red-600 hover:bg-red-700 rounded w-full text-center transition-colors duration-200`}
         >
           <MdExitToApp className="mr-2" />
-          <span className={`${isSidebarOpen ? "block" : "hidden"}`}>Logout</span>
+          <span className={`${isSidebarOpen ? "block" : "hidden"}`}>
+            Logout
+          </span>
         </button>
       </div>
     </div>

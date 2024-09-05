@@ -1,29 +1,45 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-// Sample data for state dropdown options
-const states = [
-  { value: 'California', label: 'California' },
-  { value: 'Texas', label: 'Texas' },
-  { value: 'New York', label: 'New York' },
-];
-
-// Corrected group of company options
-const groupOfCompanies = [
-  { value: 'Group1', label: 'Group1' },
-  { value: 'Group2', label: 'Group2' },
-  { value: 'Group3', label: 'Group3' },
-];
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import stateDistData from "../../../data/state-dist.json";
 
 const AddBuyer = () => {
-  const [name, setName] = useState('');
-  const [selectedGroupOfCompany, setSelectedGroupOfCompany] = useState('');
-  const [location, setLocation] = useState([]); // State for multiple selected locations
-  const [productCapacity, setProductCapacity] = useState('');
-  const [date, setDate] = useState('');
-  const [state, setState] = useState('');
+  const [name, setName] = useState("");
+  const [groupOfCompanies, setGroupOfCompanies] = useState([]);
+  const [selectedGroupOfCompany, setSelectedGroupOfCompany] = useState("");
+  const [location, setLocation] = useState([]);
+  const [productCapacity, setProductCapacity] = useState("");
+  const [date, setDate] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [cities, setCities] = useState([]);
+
+  useEffect(() => {
+    const fetchGroupOfCompanies = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/company-profile"
+        );
+        setGroupOfCompanies(response.data);
+      } catch (error) {
+        console.error("Error fetching group of companies:", error);
+      }
+    };
+    fetchGroupOfCompanies();
+  }, []);
+
+  useEffect(() => {
+    if (selectedState) {
+      const selectedStateData = stateDistData.find(
+        (state) => state.name === selectedState
+      );
+      if (selectedStateData) {
+        setCities(selectedStateData.cities);
+      } else {
+        setCities([]);
+      }
+    }
+  }, [selectedState]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,35 +50,38 @@ const AddBuyer = () => {
       locations: location,
       productCapacity,
       date,
-      state,
+      state: selectedState,
     };
 
     try {
-      const response = await axios.post('http://localhost:5000/api/buyers', buyerData);
-      toast.success('Buyer added successfully!');
-      setName('');
-      setSelectedGroupOfCompany('');
+      const response = await axios.post(
+        "http://localhost:5000/api/buyers",
+        buyerData
+      );
+      toast.success("Buyer added successfully!");
+      setName("");
+      setSelectedGroupOfCompany("");
       setLocation([]);
-      setProductCapacity('');
-      setDate('');
-      setState('');
+      setProductCapacity("");
+      setDate("");
+      setSelectedState("");
     } catch (error) {
-      toast.error(`Error adding buyer: ${error.response?.data?.message || error.message}`);
+      toast.error(
+        `Error adding buyer: ${error.response?.data?.message || error.message}`
+      );
     }
   };
 
-  // Handle change for adding a location
   const handleAddLocation = (e) => {
     const selectedValue = e.target.value;
     if (selectedValue && !location.includes(selectedValue)) {
       setLocation([...location, selectedValue]);
     }
-    e.target.value = ''; // Reset dropdown after selection
+    e.target.value = "";
   };
 
-  // Function to remove a location
   const handleRemoveLocation = (locationToRemove) => {
-    setLocation(location.filter(loc => loc !== locationToRemove));
+    setLocation(location.filter((loc) => loc !== locationToRemove));
   };
 
   return (
@@ -70,7 +89,6 @@ const AddBuyer = () => {
       <div className="w-full max-w-lg bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-4 text-center">Add Buyer</h2>
         <form onSubmit={handleSubmit}>
-          {/* Name Input */}
           <div className="mb-4">
             <label className="block text-gray-700">Name</label>
             <input
@@ -83,39 +101,62 @@ const AddBuyer = () => {
             />
           </div>
 
-          {/* Group of Company Dropdown */}
           <div className="mb-4">
             <label className="block text-gray-700">Group of Company</label>
             <select
               value={selectedGroupOfCompany}
-              onChange={(e) => setSelectedGroupOfCompany(e.target.value)}
+              onChange={(e) => {
+                setSelectedGroupOfCompany(e.target.value);
+                const selectedCompany = groupOfCompanies.find(
+                  (company) => company.groupOfCompany === e.target.value
+                );
+                if (selectedCompany) {
+                  setSelectedState(selectedCompany.state);
+                } else {
+                  setSelectedState("");
+                }
+              }}
               className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
             >
               <option value="">Select Group</option>
-              {groupOfCompanies.map((group) => (
-                <option key={group.value} value={group.value}>
-                  {group.label}
+              {groupOfCompanies.map((company) => (
+                <option key={company._id} value={company.groupOfCompany}>
+                  {company.groupOfCompany}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Location Dropdown */}
+          <div className="mb-4">
+            <label className="block text-gray-700">State</label>
+            <select
+              value={selectedState}
+              onChange={(e) => setSelectedState(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              required
+            >
+              <option value="">Select State</option>
+              {stateDistData.map((state) => (
+                <option key={state.name} value={state.name}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="mb-4">
             <label className="block text-gray-700">Location</label>
             <select
               onChange={handleAddLocation}
               className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
             >
-              <option value="">Select Location</option>
-              {states.map((state) => (
-                <option key={state.value} value={state.value}>
-                  {state.label}
+              <option value="">Select City</option>
+              {cities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
                 </option>
               ))}
             </select>
-            {/* Display selected locations as tags */}
             <div className="mt-2 flex flex-wrap">
               {location.map((loc) => (
                 <div
@@ -135,25 +176,6 @@ const AddBuyer = () => {
             </div>
           </div>
 
-          {/* State Dropdown */}
-          <div className="mb-4">
-            <label className="block text-gray-700">State</label>
-            <select
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
-            >
-              <option value="">Select State</option>
-              {states.map((state) => (
-                <option key={state.value} value={state.value}>
-                  {state.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Product Capacity Input */}
           <div className="mb-4">
             <label className="block text-gray-700">Product Capacity</label>
             <input
@@ -166,7 +188,6 @@ const AddBuyer = () => {
             />
           </div>
 
-          {/* Date Picker */}
           <div className="mb-4">
             <label className="block text-gray-700">Date</label>
             <input

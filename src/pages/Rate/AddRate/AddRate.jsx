@@ -12,28 +12,23 @@ const AddRate = () => {
     e.preventDefault();
 
     try {
-      // Validate form inputs
       if (!fromDate || !toDate || !rate) {
         toast.error("Please fill in all the fields.");
         return;
       }
 
-      // Call the API to add a new rate
       const response = await axios.post("http://localhost:5000/api/rates", {
         fromDate,
         toDate,
         rate,
       });
 
-      // If successful, show success message
       toast.success("Rate added successfully!");
 
-      // Clear form fields
       setFromDate("");
       setToDate("");
       setRate("");
     } catch (error) {
-      // Show error message if something goes wrong
       const errorMessage = error.response?.data?.message || "Failed to add rate";
       toast.error(errorMessage);
     }

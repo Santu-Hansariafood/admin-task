@@ -3,12 +3,18 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import stateDistData from "../../../data/state-dist.json";
+
 const AddLocation = () => {
   const [location, setLocation] = useState("");
   const [address, setAddress] = useState("");
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
   const [pin, setPin] = useState("");
+
+  const districtsForSelectedState = state
+    ? stateDistData.find((s) => s.name === state)?.cities || []
+    : [];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,7 +28,6 @@ const AddLocation = () => {
 
       if (response.status === 201) {
         toast.success("Location added successfully!");
-        // Clear form fields after successful submission
         setLocation("");
         setAddress("");
         setState("");
@@ -32,7 +37,6 @@ const AddLocation = () => {
         toast.error("Unexpected response status. Please try again.");
       }
     } catch (error) {
-      // Handle validation or server errors
       if (error.response) {
         if (error.response.status === 400) {
           toast.error(
@@ -90,7 +94,6 @@ const AddLocation = () => {
             className="w-full px-3 py-2 border rounded-md text-gray-700 focus:outline-none focus:border-blue-500"
           />
         </div>
-
         <div className="mb-4">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
@@ -107,9 +110,11 @@ const AddLocation = () => {
             <option value="" disabled>
               Select State
             </option>
-            <option value="State 1">State 1</option>
-            <option value="State 2">State 2</option>
-            {/* Add more states here */}
+            {stateDistData.map((stateItem) => (
+              <option key={stateItem.name} value={stateItem.name}>
+                {stateItem.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -125,13 +130,16 @@ const AddLocation = () => {
             value={district}
             onChange={(e) => setDistrict(e.target.value)}
             className="w-full px-3 py-2 border rounded-md text-gray-700 focus:outline-none focus:border-blue-500"
+            disabled={!state}
           >
             <option value="" disabled>
               Select District
             </option>
-            <option value="District 1">District 1</option>
-            <option value="District 2">District 2</option>
-            {/* Add more districts here */}
+            {districtsForSelectedState.map((districtItem) => (
+              <option key={districtItem} value={districtItem}>
+                {districtItem}
+              </option>
+            ))}
           </select>
         </div>
 

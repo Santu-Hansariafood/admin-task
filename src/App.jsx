@@ -22,6 +22,8 @@ import AddLocation from "./pages/Location/AddLocation/AddLocation";
 import ListLocation from "./pages/Location/ListLocation/ListLocation";
 import AddRate from "./pages/Rate/AddRate/AddRate";
 import RateList from "./pages/Rate/RateList/RateList";
+import ListGroupofCompany from "./pages/GroupofCompany/ListGroupofCompany/ListGroupofCompany";
+import AddGroupofCompany from "./pages/GroupofCompany/AddGroupofCompany/AddGroupofCompany";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -128,6 +130,18 @@ const App = () => {
             <Route
               path="/rate/list"
               element={isAuthenticated ? <RateList /> : <Navigate to="/" />}
+            />
+            <Route
+              path="/group/add"
+              element={
+                isAuthenticated ? <AddGroupofCompany /> : <Navigate to="/" />
+              }
+            />
+            <Route
+              path="/group/list"
+              element={
+                isAuthenticated ? <ListGroupofCompany /> : <Navigate to="/" />
+              }
             />
           </Routes>
         </div>

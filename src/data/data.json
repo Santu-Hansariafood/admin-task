@@ -55,7 +55,15 @@
         { "name": "List Rate", "path": "/rate/list" }
       ]
     },
-    
+    {
+      "id": 7,
+      "name": "Group of Company",
+      "icon": "MdBusiness",
+      "subfields": [
+        { "name": "Add Group", "path": "/group/add" },
+        { "name": "List Group", "path": "/group/list" }
+      ]
+    },
     {
       "id": 8,
       "name": "Company Profile",
