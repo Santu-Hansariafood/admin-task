@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AddPurchaser = () => {
   const [formData, setFormData] = useState({
@@ -20,24 +23,25 @@ const AddPurchaser = () => {
     e.preventDefault();
 
     try {
-      // Make an API call to store the data in the database
-      const response = await fetch("/api/purchaser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      console.log("Sending request with data:", formData);
+      const response = await axios.post(
+        "http://localhost:5000/api/purchasers",
+        formData
+      );
 
-      if (response.ok) {
-        // Handle success response
-        console.log("Purchaser data stored successfully!");
-      } else {
-        // Handle failure response
-        console.log("Error storing purchaser data.");
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Created successfully!");
+        setFormData({
+          name: "",
+          company: "",
+          location: "",
+          item: "",
+          phoneNumber: "",
+        });
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error received:", error.response);
+      toast.error(error.response?.data?.msg || "Error storing purchaser data.");
     }
   };
 
@@ -125,6 +129,7 @@ const AddPurchaser = () => {
           Submit
         </button>
       </form>
+      <ToastContainer />
     </div>
   );
 };
