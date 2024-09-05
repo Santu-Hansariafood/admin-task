@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AddLocation = () => {
   const [location, setLocation] = useState("");
@@ -7,14 +10,47 @@ const AddLocation = () => {
   const [district, setDistrict] = useState("");
   const [pin, setPin] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const locationData = { location, address, state, district, pin };
-    console.log(locationData); // Replace with API call to store data in the database
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/locations",
+        locationData
+      );
+
+      if (response.status === 201) {
+        toast.success("Location added successfully!");
+        // Clear form fields after successful submission
+        setLocation("");
+        setAddress("");
+        setState("");
+        setDistrict("");
+        setPin("");
+      } else {
+        toast.error("Unexpected response status. Please try again.");
+      }
+    } catch (error) {
+      // Handle validation or server errors
+      if (error.response) {
+        if (error.response.status === 400) {
+          toast.error(
+            error.response.data.msg ||
+              "Validation error. Please check your inputs."
+          );
+        } else if (error.response.status === 500) {
+          toast.error("Server error. Please try again later.");
+        }
+      } else {
+        toast.error("Network error. Please try again.");
+      }
+    }
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <ToastContainer />
       <form
         className="w-full max-w-lg bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
         onSubmit={handleSubmit}
