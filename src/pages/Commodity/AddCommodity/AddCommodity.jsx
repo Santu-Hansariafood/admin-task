@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+
 
 const AddCommodity = () => {
   const [commodityName, setCommodityName] = useState("");
@@ -53,7 +53,7 @@ const AddCommodity = () => {
           />
         </div>
 
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label className="block text-gray-700">Commodity Code</label>
           <input
             type="text"
@@ -63,7 +63,7 @@ const AddCommodity = () => {
             placeholder="Enter commodity code"
             required
           />
-        </div>
+        </div> */}
 
         <button
           type="submit"

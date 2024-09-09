@@ -5,6 +5,8 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import "react-toastify/dist/ReactToastify.css";
+
 import Sidebar from "./components/Sidebar/Sidebar";
 import LoginPage from "./pages/Login/LoginPage";
 import HomePage from "./pages/HomePage/HomePage";

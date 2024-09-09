@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
-import "react-toastify/dist/ReactToastify.css";
 
 const AddGroupofCompany = () => {
   const [groupName, setGroupName] = useState("");

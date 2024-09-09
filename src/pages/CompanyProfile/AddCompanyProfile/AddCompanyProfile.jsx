@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+
 import stateDistData from "../../../data/state-dist.json";
 
 const AddCompanyProfile = () => {
@@ -103,7 +103,7 @@ const AddCompanyProfile = () => {
               required
             />
           </div>
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-gray-700">Group of Company</label>
             <select
               value={selectedGroup}
@@ -118,7 +118,7 @@ const AddCompanyProfile = () => {
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
 
           <button
             type="submit"
