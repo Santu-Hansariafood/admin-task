@@ -103,23 +103,6 @@ const AddCompanyProfile = () => {
               required
             />
           </div>
-          {/* <div className="mb-4">
-            <label className="block text-gray-700">Group of Company</label>
-            <select
-              value={selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
-            >
-              <option value="">Select Group of Company</option>
-              {groupOptions.map((group) => (
-                <option key={group._id} value={group.name}>
-                  {group.name}
-                </option>
-              ))}
-            </select>
-          </div> */}
-
           <button
             type="submit"
             className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition-colors"

@@ -7,35 +7,56 @@ import "./RateList.css";
 const RateList = () => {
   const [date, setDate] = useState(new Date());
   const [rates, setRates] = useState([]);
-  const [selectedRate, setSelectedRate] = useState(null);
+  const [weekRates, setWeekRates] = useState([]);
 
+  // Fetch rates from the API
   useEffect(() => {
     const fetchRates = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/rates");
-        setRates(response.data);
+        setRates(response.data); // Store the rates in state
       } catch (error) {
         console.error("Error fetching rates:", error);
       }
     };
-
     fetchRates();
   }, []);
 
+  // Handle calendar date change
   const handleDateChange = (newDate) => {
     setDate(newDate);
-    const selectedDate = new Date(newDate).toISOString().split("T")[0];
-    const rate = rates.find(
-      (r) =>
-        selectedDate >= new Date(r.fromDate).toISOString().split("T")[0] &&
-        selectedDate <= new Date(r.toDate).toISOString().split("T")[0]
-    );
-    setSelectedRate(rate ? rate.rate : "No rate available");
+
+    // Calculate the week starting from the selected date
+    const startOfWeek = new Date(newDate);
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Get Sunday of the week
+
+    // Get the rates for each day of the selected week
+    const weekRates = [];
+    for (let i = 0; i < 7; i++) {
+      const currentDay = new Date(startOfWeek);
+      currentDay.setDate(startOfWeek.getDate() + i);
+      const formattedDate = currentDay.toISOString().split("T")[0];
+
+      // Filter rates for the current day
+      const dailyRates = rates.filter(
+        (r) =>
+          formattedDate >= new Date(r.fromDate).toISOString().split("T")[0] &&
+          formattedDate <= new Date(r.toDate).toISOString().split("T")[0]
+      );
+
+      weekRates.push({
+        day: currentDay.toDateString(),
+        rates: dailyRates,
+      });
+    }
+    setWeekRates(weekRates);
   };
+
+  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-lg bg-white p-6 rounded-lg shadow-md">
+      <div className="w-full max-w-lg bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 className="text-2xl font-bold mb-4 text-center">Rate List</h2>
         <div className="flex justify-center mb-4">
           <Calendar
@@ -47,11 +68,46 @@ const RateList = () => {
         <div className="mt-4">
           <h3 className="text-lg font-semibold">Selected Date:</h3>
           <p className="text-xl">{date.toDateString()}</p>
-          <h3 className="text-lg font-semibold mt-2">Rate:</h3>
-          <p className="text-xl">
-            {selectedRate !== null ? `₹${selectedRate}` : "No rate available"}
-          </p>
         </div>
+      </div>
+
+      {/* Weekly Rate Table */}
+      <div className="w-full max-w-4xl bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+        <h3 className="text-xl font-bold mb-4 text-center">Weekly Rate List</h3>
+        <table className="min-w-full bg-white border table-auto">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border">Company</th>
+              <th className="py-2 px-4 border">Commodity</th>
+              {daysOfWeek.map((day, index) => (
+                <th key={index} className="py-2 px-4 border">
+                  {day}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {weekRates.map((weekRate, weekIndex) =>
+              weekRate.rates.map((rate, rateIndex) => (
+                <tr key={`${weekIndex}-${rateIndex}`}>
+                  <td className="py-2 px-4 border">{rate.company}</td>
+                  <td className="py-2 px-4 border">{rate.commodity}</td>
+                  {daysOfWeek.map((_, dayIndex) => (
+                    <td key={dayIndex} className="py-2 px-4 border">
+                      {weekRates[dayIndex]?.rates?.find(
+                        (r) =>
+                          r.company === rate.company &&
+                          r.commodity === rate.commodity
+                      )
+                        ? `₹${rate.rate}`
+                        : "N/A"}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

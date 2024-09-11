@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-
 import stateDistData from "../../../data/state-dist.json";
 
 const AddBuyer = () => {
@@ -18,9 +17,9 @@ const AddBuyer = () => {
     const fetchGroupOfCompanies = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/company-profile"
+          "http://localhost:5000/api/group-of-company"
         );
-        setGroupOfCompanies(response.data);
+        setGroupOfCompanies(response.data.data); // Update to access data correctly
       } catch (error) {
         console.error("Error fetching group of companies:", error);
       }
@@ -54,11 +53,9 @@ const AddBuyer = () => {
     };
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/buyers",
-        buyerData
-      );
+      await axios.post("http://localhost:5000/api/buyers", buyerData);
       toast.success("Buyer added successfully!");
+      // Resetting the form after submission
       setName("");
       setSelectedGroupOfCompany("");
       setLocation([]);
@@ -105,24 +102,14 @@ const AddBuyer = () => {
             <label className="block text-gray-700">Group of Company</label>
             <select
               value={selectedGroupOfCompany}
-              onChange={(e) => {
-                setSelectedGroupOfCompany(e.target.value);
-                const selectedCompany = groupOfCompanies.find(
-                  (company) => company.groupOfCompany === e.target.value
-                );
-                if (selectedCompany) {
-                  setSelectedState(selectedCompany.state);
-                } else {
-                  setSelectedState("");
-                }
-              }}
+              onChange={(e) => setSelectedGroupOfCompany(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
             >
               <option value="">Select Group</option>
               {groupOfCompanies.map((company) => (
-                <option key={company._id} value={company.groupOfCompany}>
-                  {company.groupOfCompany}
+                <option key={company._id} value={company.name}>
+                  {company.name}
                 </option>
               ))}
             </select>
@@ -144,6 +131,7 @@ const AddBuyer = () => {
               ))}
             </select>
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700">Location</label>
             <select

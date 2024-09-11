@@ -1,27 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-// Sample data array for demonstration
-const companyProfiles = [
-  { id: 1, companyName: 'ABC Industries', state: 'California', brokerageRate: 100 },
-  { id: 2, companyName: 'XYZ Corp', state: 'Texas', brokerageRate: 150 },
-  { id: 3, companyName: '123 Trading Co.', state: 'New York', brokerageRate: 200 },
-];
+const CompanyProfile = () => {
+  const [companyProfiles, setCompanyProfiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-const CompanyProfileTable = () => {
+  useEffect(() => {
+    const fetchCompanyProfiles = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/company-profile');
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data = await response.json();
+        setCompanyProfiles(data);
+        setLoading(false);
+      } catch (error) {
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+
+    fetchCompanyProfiles();
+  }, []);
+
   const handleView = (id) => {
     console.log(`View company profile with ID: ${id}`);
-    // Implement view logic here
   };
 
   const handleEdit = (id) => {
     console.log(`Edit company profile with ID: ${id}`);
-    // Implement edit logic here
   };
 
   const handleDelete = (id) => {
     console.log(`Delete company profile with ID: ${id}`);
-    // Implement delete logic here
   };
+
+  if (loading) {
+    return <p>Loading company profiles...</p>;
+  }
+
+  if (error) {
+    return <p>Error fetching company profiles: {error}</p>;
+  }
+
+  if (companyProfiles.length === 0) {
+    return <p>No company profiles available.</p>;
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
@@ -39,26 +64,26 @@ const CompanyProfileTable = () => {
           </thead>
           <tbody>
             {companyProfiles.map((profile, index) => (
-              <tr key={profile.id} className="text-center">
+              <tr key={profile._id} className="text-center">
                 <td className="border p-2">{index + 1}</td>
                 <td className="border p-2">{profile.companyName}</td>
                 <td className="border p-2">{profile.state}</td>
                 <td className="border p-2">{profile.brokerageRate}</td>
                 <td className="border p-2">
                   <button
-                    onClick={() => handleView(profile.id)}
+                    onClick={() => handleView(profile._id)}
                     className="text-blue-600 hover:text-blue-800 mx-1"
                   >
                     View
                   </button>
                   <button
-                    onClick={() => handleEdit(profile.id)}
+                    onClick={() => handleEdit(profile._id)}
                     className="text-green-600 hover:text-green-800 mx-1"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(profile.id)}
+                    onClick={() => handleDelete(profile._id)}
                     className="text-red-600 hover:text-red-800 mx-1"
                   >
                     Delete
@@ -73,4 +98,4 @@ const CompanyProfileTable = () => {
   );
 };
 
-export default CompanyProfileTable;
+export default CompanyProfile;

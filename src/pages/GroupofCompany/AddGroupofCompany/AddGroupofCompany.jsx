@@ -21,7 +21,10 @@ const AddGroupofCompany = () => {
       toast.success("Group of Company added successfully!");
       setGroupName("");
     } catch (error) {
-      toast.error("Error adding Group of Company");
+      // Display backend error message to the user
+      const errorMessage =
+        error.response?.data?.message || "An unexpected error occurred";
+      toast.error(errorMessage);
     }
   };
 

@@ -1,18 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-
 
 const AddRate = () => {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [rate, setRate] = useState("");
+  const [company, setCompany] = useState("");
+  const [commodity, setCommodity] = useState("");
+  const [companies, setCompanies] = useState([]);
+  const [commodities, setCommodities] = useState([]);
+
+  // Fetch companies from API
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/company-profile"
+        );
+        setCompanies(response.data);
+      } catch (error) {
+        toast.error("Failed to fetch companies.");
+      }
+    };
+    fetchCompanies();
+  }, []);
+
+  // Fetch commodities from API
+  useEffect(() => {
+    const fetchCommodities = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/commodities"
+        );
+        setCommodities(response.data);
+      } catch (error) {
+        toast.error("Failed to fetch commodities.");
+      }
+    };
+    fetchCommodities();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      if (!fromDate || !toDate || !rate) {
+      if (!fromDate || !toDate || !rate || !company || !commodity) {
         toast.error("Please fill in all the fields.");
         return;
       }
@@ -21,15 +54,19 @@ const AddRate = () => {
         fromDate,
         toDate,
         rate,
+        company,
+        commodity,
       });
 
       toast.success("Rate added successfully!");
-
       setFromDate("");
       setToDate("");
       setRate("");
+      setCompany("");
+      setCommodity("");
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Failed to add rate";
+      const errorMessage =
+        error.response?.data?.message || "Failed to add rate";
       toast.error(errorMessage);
     }
   };
@@ -87,6 +124,50 @@ const AddRate = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
             />
+          </div>
+          <div className="mb-4">
+            <label
+              htmlFor="company"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
+              Select Company:
+            </label>
+            <select
+              id="company"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
+            >
+              <option value="">Select a Company</option>
+              {companies.map((company) => (
+                <option key={company._id} value={company.companyName}>
+                  {company.companyName}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-4">
+            <label
+              htmlFor="commodity"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
+              Select Commodity:
+            </label>
+            <select
+              id="commodity"
+              value={commodity}
+              onChange={(e) => setCommodity(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
+            >
+              <option value="">Select a Commodity</option>
+              {commodities.map((commodity) => (
+                <option key={commodity._id} value={commodity.commodityName}>
+                  {commodity.commodityName}
+                </option>
+              ))}
+            </select>
           </div>
           <button
             type="submit"

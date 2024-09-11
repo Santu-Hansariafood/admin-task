@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 
-
 import stateDistData from "../../../data/state-dist.json";
 
 const AddLocation = () => {
@@ -157,6 +156,8 @@ const AddLocation = () => {
             onChange={(e) => setPin(e.target.value)}
             placeholder="Enter pin code"
             className="w-full px-3 py-2 border rounded-md text-gray-700 focus:outline-none focus:border-blue-500"
+            maxLength={6}
+            minLength={6}
           />
         </div>
 
