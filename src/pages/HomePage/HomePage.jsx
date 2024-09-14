@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Select from "react-select";
 
-// Array to get month names for the dropdown
-const monthNames = Array.from({ length: 12 }, (_, i) => new Date(0, i).toLocaleString("default", { month: "long" }));
+const monthNames = Array.from({ length: 12 }, (_, i) =>
+  new Date(0, i).toLocaleString("default", { month: "long" })
+);
 
 const HomePage = () => {
-  // State declarations
   const [companies, setCompanies] = useState([]);
   const [places, setPlaces] = useState([]);
   const [commodities, setCommodities] = useState([]);
@@ -21,10 +21,11 @@ const HomePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch company data and places
   const fetchCompanyData = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/company-profile");
+      const response = await axios.get(
+        "http://localhost:5000/api/company-profile"
+      );
       setCompanies(response.data);
       setPlaces(response.data.map((company) => company.companyName));
     } catch (err) {
@@ -32,7 +33,6 @@ const HomePage = () => {
     }
   }, []);
 
-  // Fetch commodities data
   const fetchCommodities = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/commodities");
@@ -47,7 +47,6 @@ const HomePage = () => {
     }
   }, []);
 
-  // UseEffect hooks for fetching data and updating month dates
   useEffect(() => {
     fetchCompanyData();
     fetchCommodities();
@@ -56,7 +55,10 @@ const HomePage = () => {
   useEffect(() => {
     const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
     const firstDayOfMonth = new Date(selectedYear, selectedMonth, 1).getDay();
-    const datesArray = Array.from({ length: firstDayOfMonth }, () => null).concat(
+    const datesArray = Array.from(
+      { length: firstDayOfMonth },
+      () => null
+    ).concat(
       Array.from({ length: daysInMonth }, (_, i) => {
         const dateObj = new Date(selectedYear, selectedMonth, i + 1);
         return {
@@ -69,29 +71,46 @@ const HomePage = () => {
     setMonthDates(datesArray);
   }, [selectedMonth, selectedYear]);
 
-  // Event handlers for selecting different values
-  const handleCompanyChange = useCallback((e) => setSelectedCompany(e.target.value), []);
-  const handlePlaceChange = useCallback((e) => setSelectedPlace(e.target.value), []);
-  const handleCommodityChange = useCallback((selectedOptions) => setSelectedCommodities(selectedOptions), []);
-  const handleMonthChange = useCallback((e) => setSelectedMonth(parseInt(e.target.value)), []);
-  const handleYearChange = useCallback((e) => setSelectedYear(parseInt(e.target.value)), []);
+  const handleCompanyChange = useCallback(
+    (e) => setSelectedCompany(e.target.value),
+    []
+  );
+  const handlePlaceChange = useCallback(
+    (e) => setSelectedPlace(e.target.value),
+    []
+  );
+  const handleCommodityChange = useCallback(
+    (selectedOptions) => setSelectedCommodities(selectedOptions),
+    []
+  );
+  const handleMonthChange = useCallback(
+    (e) => setSelectedMonth(parseInt(e.target.value)),
+    []
+  );
+  const handleYearChange = useCallback(
+    (e) => setSelectedYear(parseInt(e.target.value)),
+    []
+  );
 
-  // Fetch existing calendar data based on company and date
   useEffect(() => {
     if (selectedCompany) {
       const fetchCalendar = async () => {
         try {
           setIsLoading(true);
-          const response = await axios.get(`http://localhost:5000/api/calendar/${selectedCompany}/calendar`, {
-            params: { month: selectedMonth + 1, year: selectedYear },
-          });
+          const response = await axios.get(
+            `http://localhost:5000/api/calendar/${selectedCompany}/calendar`,
+            {
+              params: { month: selectedMonth + 1, year: selectedYear },
+            }
+          );
           if (response.data) {
             setCalendarExists(true);
             const existingCalendar = response.data.calendar;
             const newInputValues = {};
             existingCalendar.forEach((dayEntry) => {
               dayEntry.commodityDetails.forEach((commodity) => {
-                newInputValues[`${dayEntry.day}_${commodity.commodityId}`] = commodity.inputValue || "";
+                newInputValues[`${dayEntry.day}_${commodity.commodityId}`] =
+                  commodity.inputValue || "";
               });
             });
             setInputValues(newInputValues);
@@ -109,7 +128,6 @@ const HomePage = () => {
     }
   }, [selectedCompany, selectedMonth, selectedYear]);
 
-  // Handle input changes for commodities
   const handleInputChange = (e, day, commodityId) => {
     setInputValues((prevValues) => ({
       ...prevValues,
@@ -117,7 +135,6 @@ const HomePage = () => {
     }));
   };
 
-  // Submit form data
   const handleSubmit = async () => {
     const calendarData = monthDates.filter(Boolean).map((dateObj) => ({
       day: dateObj.day,
@@ -126,14 +143,17 @@ const HomePage = () => {
         inputValue: inputValues[`${dateObj.day}_${commodity.value}`] || "",
       })),
     }));
-  
+
     try {
       setIsLoading(true);
-      const response = await axios.post(`http://localhost:5000/api/calendar/${selectedCompany}/calendar`, {
-        month: selectedMonth + 1,
-        year: selectedYear,
-        calendar: calendarData,
-      });
+      const response = await axios.post(
+        `http://localhost:5000/api/calendar/${selectedCompany}/calendar`,
+        {
+          month: selectedMonth + 1,
+          year: selectedYear,
+          calendar: calendarData,
+        }
+      );
       console.log("Data saved:", response.data);
       setCalendarExists(true);
     } catch (err) {
@@ -142,14 +162,16 @@ const HomePage = () => {
       setIsLoading(false);
     }
   };
-  
-  // Delete calendar data
+
   const handleDelete = async () => {
     try {
       setIsLoading(true);
-      await axios.delete(`http://localhost:5000/api/calendar/${selectedCompany}/calendar`, {
-        params: { month: selectedMonth + 1, year: selectedYear },
-      });
+      await axios.delete(
+        `http://localhost:5000/api/calendar/${selectedCompany}/calendar`,
+        {
+          params: { month: selectedMonth + 1, year: selectedYear },
+        }
+      );
       setCalendarExists(false);
       setInputValues({});
     } catch (err) {
@@ -158,7 +180,6 @@ const HomePage = () => {
       setIsLoading(false);
     }
   };
-  
 
   // Rendering weeks and input fields
   const renderWeeks = useCallback(() => {
@@ -204,8 +225,12 @@ const HomePage = () => {
                       <input
                         type="text"
                         placeholder={`${commodity.label} ${dateObj.weekday} ${dateObj.day}`}
-                        value={inputValues[`${dateObj.day}_${commodity.value}`] || ""}
-                        onChange={(e) => handleInputChange(e, dateObj.day, commodity.value)}
+                        value={
+                          inputValues[`${dateObj.day}_${commodity.value}`] || ""
+                        }
+                        onChange={(e) =>
+                          handleInputChange(e, dateObj.day, commodity.value)
+                        }
                         className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                       />
                     </div>
@@ -218,7 +243,16 @@ const HomePage = () => {
           })}
       </tr>
     ));
-  }, [commodities, handleCommodityChange, handleInputChange, inputValues, monthDates, places, selectedCommodities, selectedPlace]);
+  }, [
+    commodities,
+    handleCommodityChange,
+    handleInputChange,
+    inputValues,
+    monthDates,
+    places,
+    selectedCommodities,
+    selectedPlace,
+  ]);
 
   return (
     <div className="container mx-auto p-6 bg-gray-50 shadow-lg rounded-lg">
@@ -227,7 +261,6 @@ const HomePage = () => {
         {error && <p className="text-red-500">{error}</p>}
       </div>
 
-      {/* Form Controls */}
       <div className="flex gap-4 mb-6">
         <select
           value={selectedCompany}
@@ -262,7 +295,6 @@ const HomePage = () => {
         />
       </div>
 
-      {/* Calendar Table */}
       <table className="w-full border-collapse table-auto bg-white rounded-lg shadow">
         <thead>
           <tr className="border-b border-gray-300 bg-gray-100">
@@ -281,18 +313,25 @@ const HomePage = () => {
         <tbody>{renderWeeks()}</tbody>
       </table>
 
-      {/* Action Buttons */}
       <div className="mt-6">
         <button
-          className={`px-5 py-2 rounded-lg text-white font-semibold ${isLoading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}`}
+          className={`px-5 py-2 rounded-lg text-white font-semibold ${
+            isLoading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+          }`}
           onClick={handleSubmit}
           disabled={isLoading}
         >
-          {isLoading ? "Saving..." : calendarExists ? "Update Calendar" : "Save Calendar"}
+          {isLoading
+            ? "Saving..."
+            : calendarExists
+            ? "Update Calendar"
+            : "Save Calendar"}
         </button>
         {calendarExists && (
           <button
-            className={`ml-3 px-5 py-2 rounded-lg text-white font-semibold ${isLoading ? "bg-gray-400" : "bg-red-600 hover:bg-red-700"}`}
+            className={`ml-3 px-5 py-2 rounded-lg text-white font-semibold ${
+              isLoading ? "bg-gray-400" : "bg-red-600 hover:bg-red-700"
+            }`}
             onClick={handleDelete}
             disabled={isLoading}
           >
