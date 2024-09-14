@@ -1,26 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 
 const ListLocation = () => {
-  const [locations, setLocations] = useState([
-    {
-      id: 1,
-      location: "Location 1",
-      address: "123 Main St",
-      state: "State 1",
-      district: "District 1",
-      pin: "123456",
-    },
-    {
-      id: 2,
-      location: "Location 2",
-      address: "456 Oak St",
-      state: "State 2",
-      district: "District 2",
-      pin: "654321",
-    },
-    // Add more location data here
-  ]);
+  const [locations, setLocations] = useState([]);
+
+  // Fetch locations data from the API
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/locations");
+        setLocations(response.data); // Assuming the response is directly the array of locations
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+      }
+    };
+
+    fetchLocations();
+  }, []);
 
   const handleView = (id) => {
     alert(`Viewing location with ID: ${id}`);
@@ -31,7 +28,7 @@ const ListLocation = () => {
   };
 
   const handleDelete = (id) => {
-    setLocations(locations.filter((location) => location.id !== id));
+    setLocations(locations.filter((location) => location._id !== id));
     alert(`Deleted location with ID: ${id}`);
   };
 
@@ -54,7 +51,7 @@ const ListLocation = () => {
             </thead>
             <tbody>
               {locations.map((location, index) => (
-                <tr key={location.id} className="hover:bg-gray-100">
+                <tr key={location._id} className="hover:bg-gray-100">
                   <td className="px-4 py-2">{index + 1}</td>
                   <td className="px-4 py-2">{location.location}</td>
                   <td className="px-4 py-2">{location.address}</td>
@@ -64,25 +61,22 @@ const ListLocation = () => {
                   <td className="px-4 py-2">
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => handleView(location.id)}
+                        onClick={() => handleView(location._id)}
                         className="bg-blue-500 text-white p-2 rounded hover:bg-blue-700 flex items-center"
                       >
                         <FaEye className="mr-1" />
-                        View
                       </button>
                       <button
-                        onClick={() => handleEdit(location.id)}
+                        onClick={() => handleEdit(location._id)}
                         className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-700 flex items-center"
                       >
                         <FaEdit className="mr-1" />
-                        Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(location.id)}
+                        onClick={() => handleDelete(location._id)}
                         className="bg-red-500 text-white p-2 rounded hover:bg-red-700 flex items-center"
                       >
                         <FaTrash className="mr-1" />
-                        Delete
                       </button>
                     </div>
                   </td>

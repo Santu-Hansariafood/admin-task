@@ -33,7 +33,13 @@ const AddRate = () => {
         const response = await axios.get(
           "http://localhost:5000/api/commodities"
         );
-        setCommodities(response.data);
+        // Ensure response data is an array
+        if (Array.isArray(response.data)) {
+          setCommodities(response.data);
+        } else {
+          setCommodities([]);
+          toast.error("Invalid data format for commodities.");
+        }
       } catch (error) {
         toast.error("Failed to fetch commodities.");
       }
@@ -162,11 +168,15 @@ const AddRate = () => {
               required
             >
               <option value="">Select a Commodity</option>
-              {commodities.map((commodity) => (
-                <option key={commodity._id} value={commodity.commodityName}>
-                  {commodity.commodityName}
-                </option>
-              ))}
+              {commodities.length > 0 ? (
+                commodities.map((commodity) => (
+                  <option key={commodity._id} value={commodity.commodityName}>
+                    {commodity.commodityName}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No commodities available</option>
+              )}
             </select>
           </div>
           <button

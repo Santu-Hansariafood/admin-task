@@ -1,36 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const BuyerList = () => {
-  // Sample data for demonstration purposes
-  const [buyers, setBuyers] = useState([
-    {
-      id: 1,
-      name: 'John Doe',
-      groupOfCompany: 'Group1',
-      location: 'New York',
-      productCapacity: '1000',
-      date: '2024-09-03',
-      state: 'New York',
-      units: ['Unit1', 'Unit2'],
-    },
-    // Add more sample buyers as needed
-  ]);
+  const [buyers, setBuyers] = useState([]);
+
+  // Fetch buyers data from the API
+  useEffect(() => {
+    const fetchBuyers = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/buyers');
+        setBuyers(response.data);
+      } catch (error) {
+        console.error('Error fetching buyers data:', error);
+      }
+    };
+
+    fetchBuyers();
+  }, []);
 
   // Handle Delete Buyer
   const deleteBuyer = (id) => {
-    setBuyers(buyers.filter(buyer => buyer.id !== id));
+    setBuyers(buyers.filter(buyer => buyer._id !== id));
   };
 
   // Handle Edit Buyer (for simplicity, this will just log the buyer info)
   const editBuyer = (id) => {
-    const buyerToEdit = buyers.find(buyer => buyer.id === id);
+    const buyerToEdit = buyers.find(buyer => buyer._id === id);
     console.log('Editing buyer:', buyerToEdit);
     // Additional logic to handle editing can be implemented here
   };
 
   // Handle View Buyer Details (for simplicity, this will just log the buyer info)
   const viewBuyer = (id) => {
-    const buyerToView = buyers.find(buyer => buyer.id === id);
+    const buyerToView = buyers.find(buyer => buyer._id === id);
     console.log('Viewing buyer:', buyerToView);
     // Additional logic to handle viewing details can be implemented here
   };
@@ -45,40 +47,38 @@ const BuyerList = () => {
               <th className="text-left p-3 px-5">No</th>
               <th className="text-left p-3 px-5">Name</th>
               <th className="text-left p-3 px-5">Group of Company</th>
-              <th className="text-left p-3 px-5">Location</th>
+              <th className="text-left p-3 px-5">Locations</th>
               <th className="text-left p-3 px-5">Product Capacity</th>
               <th className="text-left p-3 px-5">Date</th>
               <th className="text-left p-3 px-5">State</th>
-              <th className="text-left p-3 px-5">Units</th>
               <th className="text-left p-3 px-5">Actions</th>
             </tr>
           </thead>
           <tbody>
             {buyers.map((buyer, index) => (
-              <tr key={buyer.id} className="border-b hover:bg-gray-50">
+              <tr key={buyer._id} className="border-b hover:bg-gray-50">
                 <td className="p-3 px-5">{index + 1}</td>
                 <td className="p-3 px-5">{buyer.name}</td>
                 <td className="p-3 px-5">{buyer.groupOfCompany}</td>
-                <td className="p-3 px-5">{buyer.location}</td>
+                <td className="p-3 px-5">{buyer.locations.join(', ')}</td>
                 <td className="p-3 px-5">{buyer.productCapacity}</td>
-                <td className="p-3 px-5">{buyer.date}</td>
+                <td className="p-3 px-5">{new Date(buyer.date).toLocaleDateString()}</td>
                 <td className="p-3 px-5">{buyer.state}</td>
-                <td className="p-3 px-5">{buyer.units.join(', ')}</td>
                 <td className="p-3 px-5">
                   <button
-                    onClick={() => viewBuyer(buyer.id)}
+                    onClick={() => viewBuyer(buyer._id)}
                     className="text-blue-500 hover:underline mr-2"
                   >
                     View
                   </button>
                   <button
-                    onClick={() => editBuyer(buyer.id)}
+                    onClick={() => editBuyer(buyer._id)}
                     className="text-green-500 hover:underline mr-2"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => deleteBuyer(buyer.id)}
+                    onClick={() => deleteBuyer(buyer._id)}
                     className="text-red-500 hover:underline"
                   >
                     Delete

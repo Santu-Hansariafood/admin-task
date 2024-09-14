@@ -2,25 +2,23 @@ import React, { useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 
-
 const AddCommodity = () => {
   const [commodityName, setCommodityName] = useState("");
-  const [commodityCode, setCommodityCode] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (commodityName && commodityCode) {
+    if (commodityName) {
       try {
-        const response = await axios.post("http://localhost:5000/api/commodities", {
-          commodityName,
-          commodityCode,
-        });
+        const response = await axios.post(
+          "http://localhost:5000/api/commodities",
+          {
+            commodityName,
+          }
+        );
 
         if (response.status === 201) {
           toast.success("Commodity added successfully!");
-          // Reset form
           setCommodityName("");
-          setCommodityCode("");
         } else {
           toast.error("Failed to add commodity.");
         }
@@ -52,18 +50,6 @@ const AddCommodity = () => {
             required
           />
         </div>
-
-        {/* <div className="mb-4">
-          <label className="block text-gray-700">Commodity Code</label>
-          <input
-            type="text"
-            value={commodityCode}
-            onChange={(e) => setCommodityCode(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded mt-1"
-            placeholder="Enter commodity code"
-            required
-          />
-        </div> */}
 
         <button
           type="submit"
