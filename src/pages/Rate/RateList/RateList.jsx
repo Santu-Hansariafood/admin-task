@@ -7,6 +7,7 @@ const WeeklyRateTable = () => {
   const [rateData, setRateData] = useState([]);
   const [startDate, setStartDate] = useState(new Date());
   const [weekDays, setWeekDays] = useState([]);
+  const [editableRates, setEditableRates] = useState({});
 
   const getWeekDays = (date) => {
     const start = new Date(date);
@@ -20,6 +21,7 @@ const WeeklyRateTable = () => {
 
     return days;
   };
+
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/rate-entry")
@@ -45,6 +47,18 @@ const WeeklyRateTable = () => {
     return acc;
   }, {});
 
+  const handleRateChange = (companyName, entryIndex, commodityIndex, day, newRate) => {
+    setEditableRates((prevRates) => ({
+      ...prevRates,
+      [`${companyName}-${entryIndex}-${commodityIndex}-${day}`]: newRate,
+    }));
+  };
+
+  const getRateValue = (companyName, entryIndex, commodityIndex, day, defaultValue) => {
+    const key = `${companyName}-${entryIndex}-${commodityIndex}-${day}`;
+    return editableRates[key] !== undefined ? editableRates[key] : defaultValue;
+  };
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-xl font-bold mb-4">Weekly Rate Table</h1>
@@ -58,13 +72,14 @@ const WeeklyRateTable = () => {
 
       {Object.keys(groupedData).map((companyName) => (
         <div key={companyName} className="mb-6">
-          <h2 className="text-lg font-semibold mb-2">{companyName}</h2>
+          <h2 className="text-lg font-semibold mb-2">
+            {companyName} - {groupedData[companyName][0]?.location?.[0] || "N/A"}
+          </h2>
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr>
                 <th className="border p-2">Sl. No</th>
                 <th className="border p-2">Commodity</th>
-                <th className="border p-2">Location</th>
                 {weekDays.map((day, index) => (
                   <th key={index} className="border p-2">
                     {new Date(day).toLocaleDateString("en-US", {
@@ -77,24 +92,40 @@ const WeeklyRateTable = () => {
               </tr>
             </thead>
             <tbody>
-              {groupedData[companyName].map((entry, index) =>
+              {groupedData[companyName].map((entry, entryIndex) =>
                 entry.commodities.map((commodity, commodityIndex) => (
-                  <tr key={`${index}-${commodityIndex}`}>
+                  <tr key={`${entryIndex}-${commodityIndex}`}>
                     {commodityIndex === 0 && (
                       <td
                         rowSpan={entry.commodities.length}
                         className="border p-2 text-center"
                       >
-                        {index + 1}
+                        {entryIndex + 1}
                       </td>
                     )}
                     <td className="border p-2">{commodity.commodityName}</td>
-                    <td className="border p-2">
-                      {entry.location[commodityIndex] || "N/A"}
-                    </td>
                     {weekDays.map((day, dayIndex) => (
                       <td key={dayIndex} className="border p-2">
-                        {entry.date === day ? commodity.rate : "-"}
+                        <input
+                          type="text"
+                          value={getRateValue(
+                            companyName,
+                            entryIndex,
+                            commodityIndex,
+                            day,
+                            entry.date === day ? commodity.rate : "-"
+                          )}
+                          onChange={(e) =>
+                            handleRateChange(
+                              companyName,
+                              entryIndex,
+                              commodityIndex,
+                              day,
+                              e.target.value
+                            )
+                          }
+                          className="w-full p-2 border border-gray-300"
+                        />
                       </td>
                     ))}
                   </tr>
