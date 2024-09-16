@@ -1,193 +1,168 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
+import Select from "react-select";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AddRate = () => {
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
-  const [rate, setRate] = useState("");
-  const [company, setCompany] = useState("");
-  const [commodity, setCommodity] = useState("");
   const [companies, setCompanies] = useState([]);
   const [commodities, setCommodities] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [selectedCompany, setSelectedCompany] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const [selectedCommodity, setSelectedCommodity] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState([]);
+  const [rates, setRates] = useState({});
 
-  // Fetch companies from API
+  // Fetch companies, commodities, and locations from the API
   useEffect(() => {
-    const fetchCompanies = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5000/api/company-profile"
-        );
-        setCompanies(response.data);
-      } catch (error) {
-        toast.error("Failed to fetch companies.");
-      }
-    };
-    fetchCompanies();
+    axios.get("http://localhost:5000/api/company-profile").then((response) => {
+      setCompanies(response.data);
+    });
+    axios.get("http://localhost:5000/api/commodities").then((response) => {
+      setCommodities(response.data);
+    });
+    axios.get("http://localhost:5000/api/locations").then((response) => {
+      setLocations(response.data);
+    });
   }, []);
 
-  // Fetch commodities from API
-  useEffect(() => {
-    const fetchCommodities = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5000/api/commodities"
-        );
-        // Ensure response data is an array
-        if (Array.isArray(response.data)) {
-          setCommodities(response.data);
-        } else {
-          setCommodities([]);
-          toast.error("Invalid data format for commodities.");
-        }
-      } catch (error) {
-        toast.error("Failed to fetch commodities.");
-      }
-    };
-    fetchCommodities();
-  }, []);
-
-  const handleSubmit = async (e) => {
+  // Handle form submission
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    try {
-      if (!fromDate || !toDate || !rate || !company || !commodity) {
-        toast.error("Please fill in all the fields.");
-        return;
-      }
+    const formData = {
+      company: selectedCompany.map((company) => company.label), // Use name instead of ID
+      date: selectedDate,
+      commodities: selectedCommodity.map((commodity) => ({
+        commodityName: commodity.label, // Use name instead of ID
+        rate: rates[commodity.value],
+      })),
+      location: selectedLocation.map((location) => location.label), // Use name instead of ID
+    };
 
-      const response = await axios.post("http://localhost:5000/api/rates", {
-        fromDate,
-        toDate,
-        rate,
-        company,
-        commodity,
+    // Make the API call to submit the data
+    axios
+      .post("http://localhost:5000/api/rate-entry", formData)
+      .then((response) => {
+        console.log("Data submitted successfully", response.data);
+        toast.success("Data submitted successfully!");
+
+        // Clear form data after successful submission
+        setSelectedCompany([]);
+        setSelectedDate(new Date().toISOString().split("T")[0]);
+        setSelectedCommodity([]);
+        setSelectedLocation([]);
+        setRates({});
+      })
+      .catch((error) => {
+        console.error("Error submitting data", error);
+        toast.error("Error submitting data. Please try again.");
       });
+  };
 
-      toast.success("Rate added successfully!");
-      setFromDate("");
-      setToDate("");
-      setRate("");
-      setCompany("");
-      setCommodity("");
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to add rate";
-      toast.error(errorMessage);
-    }
+  // Handle rate change for each commodity
+  const handleRateChange = (commodityId, value) => {
+    setRates((prevRates) => ({ ...prevRates, [commodityId]: value }));
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white shadow-md rounded p-6">
-        <h2 className="text-2xl font-bold mb-6 text-center">Add Rate</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label
-              htmlFor="fromDate"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              From Date:
-            </label>
-            <input
-              type="date"
-              id="fromDate"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="toDate"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              To Date:
-            </label>
-            <input
-              type="date"
-              id="toDate"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="rate"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Rate:
-            </label>
-            <input
-              type="number"
-              id="rate"
-              value={rate}
-              placeholder="Enter Rate"
-              onChange={(e) => setRate(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="company"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Select Company:
-            </label>
-            <select
-              id="company"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-            >
-              <option value="">Select a Company</option>
-              {companies.map((company) => (
-                <option key={company._id} value={company.companyName}>
-                  {company.companyName}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="commodity"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Select Commodity:
-            </label>
-            <select
-              id="commodity"
-              value={commodity}
-              onChange={(e) => setCommodity(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-            >
-              <option value="">Select a Commodity</option>
-              {commodities.length > 0 ? (
-                commodities.map((commodity) => (
-                  <option key={commodity._id} value={commodity.commodityName}>
-                    {commodity.commodityName}
-                  </option>
-                ))
-              ) : (
-                <option disabled>No commodities available</option>
-              )}
-            </select>
-          </div>
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-          >
-            Submit
-          </button>
-        </form>
-        <ToastContainer />
-      </div>
+    <div className="p-6 max-w-lg mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Select Company (multiple select) */}
+        <div>
+          <label className="block mb-2 text-sm font-medium">
+            Select Company
+          </label>
+          <Select
+            isMulti
+            options={companies.map((company) => ({
+              value: company._id,
+              label: company.companyName,
+            }))}
+            value={selectedCompany}
+            onChange={setSelectedCompany}
+            className="w-full"
+          />
+        </div>
+
+        {/* Select Location */}
+        <div>
+          <label className="block mb-2 text-sm font-medium">
+            Select Location
+          </label>
+          <Select
+            isMulti
+            options={locations.map((location) => ({
+              value: location._id,
+              label: `${location.location}, ${location.address}, ${location.state}, ${location.district}, ${location.pin}`,
+            }))}
+            value={selectedLocation}
+            onChange={setSelectedLocation}
+            className="w-full"
+          />
+        </div>
+
+        {/* Select Date */}
+        <div>
+          <label className="block mb-2 text-sm font-medium">Select Date</label>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+
+        {/* Select Commodity (multiple select) */}
+        <div>
+          <label className="block mb-2 text-sm font-medium">
+            Select Commodity
+          </label>
+          <Select
+            isMulti
+            options={commodities.map((commodity) => ({
+              value: commodity._id,
+              label: commodity.commodityName,
+            }))}
+            value={selectedCommodity}
+            onChange={setSelectedCommodity}
+            className="w-full"
+          />
+        </div>
+
+        {/* Rate Input for each selected commodity */}
+        {selectedCommodity.length > 0 &&
+          selectedCommodity.map((commodity) => (
+            <div key={commodity.value}>
+              <label className="block mb-2 text-sm font-medium">
+                Enter Rate for {commodity.label}
+              </label>
+              <input
+                type="text"
+                placeholder={`Enter rate for ${commodity.label}`}
+                value={rates[commodity.value] || ""}
+                onChange={(e) =>
+                  handleRateChange(commodity.value, e.target.value)
+                }
+                className="w-full p-2 border rounded"
+              />
+            </div>
+          ))}
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Submit
+        </button>
+      </form>
+
+      {/* Toastify Notification Container */}
+      <ToastContainer />
     </div>
   );
 };

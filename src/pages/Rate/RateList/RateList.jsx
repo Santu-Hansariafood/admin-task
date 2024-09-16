@@ -1,124 +1,106 @@
-import React, { useState, useEffect } from "react";
-import Calendar from "react-calendar";
-import axios from "axios";
-import "react-calendar/dist/Calendar.css";
-import "./RateList.css";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 
-const RateList = () => {
-  const [date, setDate] = useState(new Date());
-  const [rates, setRates] = useState([]);
-  const [weekRates, setWeekRates] = useState([]);
+const WeeklyRateTable = () => {
+  const [rateData, setRateData] = useState([]);
+  const [startDate, setStartDate] = useState(new Date());
+  const [weekDays, setWeekDays] = useState([]);
 
-  // Fetch rates from the API
-  useEffect(() => {
-    const fetchRates = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/rates");
-        console.log("API Response:", response.data); // Log the API response
-        setRates(response.data); // Store the rates in state
-      } catch (error) {
-        console.error("Error fetching rates:", error);
-      }
-    };
-    fetchRates();
-  }, []);
+  // Function to generate the current week's dates based on selected start date
+  const getWeekDays = (date) => {
+    const start = new Date(date);
+    const days = [];
 
-  // Handle calendar date change
-  const handleDateChange = (newDate) => {
-    setDate(newDate);
-
-    // Calculate the week starting from the selected date (Sunday to Saturday)
-    const startOfWeek = new Date(newDate);
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Set to the start of the week (Sunday)
-
-    const weekRates = [];
     for (let i = 0; i < 7; i++) {
-      const currentDay = new Date(startOfWeek);
-      currentDay.setDate(startOfWeek.getDate() + i); // Iterate through each day of the week
-      const formattedDate = currentDay.toISOString().split("T")[0]; // Format as YYYY-MM-DD
-
-      console.log("Processing date:", formattedDate); // Log each processed date
-
-      // Filter rates for the current day
-      const dailyRates = rates.filter((r) => {
-        const fromDate = new Date(r.fromDate).toISOString().split("T")[0];
-        const toDate = new Date(r.toDate).toISOString().split("T")[0];
-        return formattedDate >= fromDate && formattedDate <= toDate;
-      });
-
-      weekRates.push({
-        day: currentDay.toDateString(),
-        rates: dailyRates,
-      });
+      const currentDay = new Date(start);
+      currentDay.setDate(start.getDate() + i);
+      days.push(currentDay.toISOString().split('T')[0]); // Format as yyyy-mm-dd
     }
-    setWeekRates(weekRates);
+
+    return days;
   };
 
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  // Fetch rate data from API
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/rate-entry')
+      .then(response => {
+        setRateData(response.data);
+      })
+      .catch(error => {
+        console.error("Error fetching rate data", error);
+      });
+  }, []);
+
+  // Update week days based on selected date
+  useEffect(() => {
+    setWeekDays(getWeekDays(startDate));
+  }, [startDate]);
+
+  // Group data by company name
+  const groupedData = rateData.reduce((acc, entry) => {
+    entry.company.forEach(company => {
+      if (!acc[company]) {
+        acc[company] = [];
+      }
+      acc[company].push(entry);
+    });
+    return acc;
+  }, {});
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-lg bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 className="text-2xl font-bold mb-4 text-center">Rate List</h2>
-        <div className="flex justify-center mb-4">
-          <Calendar
-            onChange={handleDateChange}
-            value={date}
-            className="react-calendar border border-gray-300 rounded-lg shadow-md"
-          />
-        </div>
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold">Selected Date:</h3>
-          <p className="text-xl">{date.toDateString()}</p>
-        </div>
-      </div>
+    <div className="container mx-auto p-6">
+      <h1 className="text-xl font-bold mb-4">Weekly Rate Table</h1>
+      
+      {/* Calendar to select the start of the week */}
+      <Calendar
+        onChange={setStartDate}
+        value={startDate}
+        maxDetail="month"
+        minDetail="month"
+      />
 
-      {/* Weekly Rate Table */}
-      <div className="w-full max-w-4xl bg-white p-6 rounded-lg shadow-md overflow-x-auto">
-        <h3 className="text-xl font-bold mb-4 text-center">Weekly Rate List</h3>
-        <table className="min-w-full bg-white border table-auto">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border">Company</th>
-              <th className="py-2 px-4 border">Commodity</th>
-              {daysOfWeek.map((day, index) => (
-                <th key={index} className="py-2 px-4 border">
-                  {day}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rates.length === 0 ? (
+      {/* Table for displaying weekly rates */}
+      {Object.keys(groupedData).map(companyName => (
+        <div key={companyName} className="mb-6">
+          <h2 className="text-lg font-semibold mb-2">{companyName}</h2>
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
               <tr>
-                <td colSpan={daysOfWeek.length + 2} className="py-4 text-center">
-                  No rates available
-                </td>
+                <th className="border p-2">Sl. No</th>
+                <th className="border p-2">Commodity</th>
+                <th className="border p-2">Location</th>
+                {weekDays.map((day, index) => (
+                  <th key={index} className="border p-2">{new Date(day).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })}</th>
+                ))}
               </tr>
-            ) : (
-              rates.map((rate, rateIndex) => (
-                <tr key={rate._id}>
-                  <td className="py-2 px-4 border">{rate.company}</td>
-                  <td className="py-2 px-4 border">{rate.commodity}</td>
-                  {weekRates.map((weekRate, dayIndex) => (
-                    <td key={dayIndex} className="py-2 px-4 border">
-                      {weekRate.rates.find(
-                        (r) =>
-                          r.company === rate.company &&
-                          r.commodity === rate.commodity
-                      )
-                        ? `₹${rate.rate}`
-                        : "N/A"}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {groupedData[companyName].map((entry, index) => (
+                entry.commodities.map((commodity, commodityIndex) => (
+                  <tr key={`${index}-${commodityIndex}`}>
+                    {commodityIndex === 0 && (
+                      <td rowSpan={entry.commodities.length} className="border p-2 text-center">
+                        {index + 1}
+                      </td>
+                    )}
+                    <td className="border p-2">{commodity.commodityName}</td>
+                    <td className="border p-2">{entry.location[commodityIndex] || 'N/A'}</td>
+                    {weekDays.map((day, dayIndex) => (
+                      <td key={dayIndex} className="border p-2">
+                        {entry.date === day ? commodity.rate : '-'}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
     </div>
   );
 };
 
-export default RateList;
+export default WeeklyRateTable;
