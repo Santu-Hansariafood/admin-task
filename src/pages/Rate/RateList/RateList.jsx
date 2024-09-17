@@ -3,7 +3,7 @@ import axios from "axios";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
-const WeeklyRateTable = () => {
+const RateList = () => {
   const [rateData, setRateData] = useState([]);
   const [startDate, setStartDate] = useState(new Date());
   const [weekDays, setWeekDays] = useState([]);
@@ -47,22 +47,65 @@ const WeeklyRateTable = () => {
     return acc;
   }, {});
 
-  const handleRateChange = (companyName, entryIndex, commodityIndex, day, newRate) => {
+  const handleRateChange = (
+    companyName,
+    entryIndex,
+    commodityIndex,
+    day,
+    newRate
+  ) => {
     setEditableRates((prevRates) => ({
       ...prevRates,
       [`${companyName}-${entryIndex}-${commodityIndex}-${day}`]: newRate,
     }));
   };
 
-  const getRateValue = (companyName, entryIndex, commodityIndex, day, defaultValue) => {
+  const getRateValue = (
+    companyName,
+    entryIndex,
+    commodityIndex,
+    day,
+    defaultValue
+  ) => {
     const key = `${companyName}-${entryIndex}-${commodityIndex}-${day}`;
     return editableRates[key] !== undefined ? editableRates[key] : defaultValue;
+  };
+
+  const handleUpdateRates = async (companyName) => {
+    const updates = [];
+
+    Object.keys(editableRates).forEach((key) => {
+      if (key.startsWith(companyName)) {
+        const [_, entryIndex, commodityIndex, date] = key.split("-"); // This date should already be in YYYY-MM-DD format
+        const updatedRate = editableRates[key];
+
+        if (updatedRate !== "-") {
+          updates.push({
+            entryIndex: Number(entryIndex),
+            commodityIndex: Number(commodityIndex),
+            date: date,
+            rate: updatedRate,
+          });
+        }
+      }
+    });
+
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/rate-entry/${companyName}`,
+        { updates }
+      );
+      console.log("Rates updated successfully:", response.data);
+      alert("Rates updated successfully!");
+    } catch (error) {
+      console.error("Error updating rates:", error);
+      alert("Error updating rates.");
+    }
   };
 
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-xl font-bold mb-4">Weekly Rate Table</h1>
-
       <Calendar
         onChange={setStartDate}
         value={startDate}
@@ -73,7 +116,8 @@ const WeeklyRateTable = () => {
       {Object.keys(groupedData).map((companyName) => (
         <div key={companyName} className="mb-6">
           <h2 className="text-lg font-semibold mb-2">
-            {companyName} - {groupedData[companyName][0]?.location?.[0] || "N/A"}
+            {companyName} -{" "}
+            {groupedData[companyName][0]?.location?.[0] || "N/A"}
           </h2>
           <table className="w-full border-collapse border border-gray-300">
             <thead>
@@ -113,17 +157,24 @@ const WeeklyRateTable = () => {
                             entryIndex,
                             commodityIndex,
                             day,
-                            entry.date === day ? commodity.rate : "-"
+                            entry.commodities[commodityIndex]?.rates.find(
+                              (rate) => rate.date === day
+                            )?.rate || ""
                           )}
-                          onChange={(e) =>
-                            handleRateChange(
-                              companyName,
-                              entryIndex,
-                              commodityIndex,
-                              day,
-                              e.target.value
-                            )
-                          }
+                          onChange={(e) => {
+                            const newValue = e.target.value;
+                            if (/^\d{0,5}$/.test(newValue)) {
+                              handleRateChange(
+                                companyName,
+                                entryIndex,
+                                commodityIndex,
+                                day,
+                                newValue
+                              );
+                            }
+                          }}
+                          maxLength={5}
+                          placeholder="Enter rate"
                           className="w-full p-2 border border-gray-300"
                         />
                       </td>
@@ -133,10 +184,17 @@ const WeeklyRateTable = () => {
               )}
             </tbody>
           </table>
+
+          <button
+            onClick={() => handleUpdateRates(companyName)}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Update {companyName} Rates
+          </button>
         </div>
       ))}
     </div>
   );
 };
 
-export default WeeklyRateTable;
+export default RateList;

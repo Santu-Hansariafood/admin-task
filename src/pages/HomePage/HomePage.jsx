@@ -1,158 +1,190 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Select from "react-select";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 
 const HomePage = () => {
-  const [companies, setCompanies] = useState([]);
-  const [commodities, setCommodities] = useState([]);
-  const [locations, setLocations] = useState([]);
-  const [selectedCompany, setSelectedCompany] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
-  const [selectedCommodity, setSelectedCommodity] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState([]);
-  const [rates, setRates] = useState({});
+  const [rateData, setRateData] = useState([]);
+  const [startDate, setStartDate] = useState(new Date());
+  const [weekDays, setWeekDays] = useState([]);
+  const [editableRates, setEditableRates] = useState({});
 
-  // Fetch companies, commodities, and locations from the API
+  const getWeekDays = (date) => {
+    const start = new Date(date);
+    const days = [];
+
+    for (let i = 0; i < 7; i++) {
+      const currentDay = new Date(start);
+      currentDay.setDate(start.getDate() + i);
+      days.push(currentDay.toISOString().split("T")[0]);
+    }
+
+    return days;
+  };
+
   useEffect(() => {
-    axios.get("http://localhost:5000/api/company-profile").then((response) => {
-      setCompanies(response.data);
-    });
-    axios.get("http://localhost:5000/api/commodities").then((response) => {
-      setCommodities(response.data);
-    });
-    axios.get("http://localhost:5000/api/locations").then((response) => {
-      setLocations(response.data);
-    });
-  }, []);
-
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    const formData = {
-      company: selectedCompany.map((company) => company.value),
-      date: selectedDate,
-      commodities: selectedCommodity.map((commodity) => ({
-        commodityId: commodity.value,
-        rate: rates[commodity.value],
-      })),
-      location: selectedLocation.map((location) => location.value),
-    };
-
-    console.log("Form Data:", formData);
-
-    // Make the API call to submit the data
     axios
-      .post("http://localhost:5000/api/rate-entry", formData)
+      .get("http://localhost:5000/api/rate-entry")
       .then((response) => {
-        console.log("Data submitted successfully", response.data);
-        alert("Data submitted successfully!");
+        setRateData(response.data);
       })
       .catch((error) => {
-        console.error("Error submitting data", error);
-        alert("Error submitting data. Please try again.");
+        console.error("Error fetching rate data", error);
       });
+  }, []);
+
+  useEffect(() => {
+    setWeekDays(getWeekDays(startDate));
+  }, [startDate]);
+
+  const groupedData = rateData.reduce((acc, entry) => {
+    entry.company.forEach((company) => {
+      if (!acc[company]) {
+        acc[company] = [];
+      }
+      acc[company].push(entry);
+    });
+    return acc;
+  }, {});
+
+  const handleRateChange = (
+    companyName,
+    entryIndex,
+    commodityIndex,
+    day,
+    newRate
+  ) => {
+    setEditableRates((prevRates) => ({
+      ...prevRates,
+      [`${companyName}-${entryIndex}-${commodityIndex}-${day}`]: newRate,
+    }));
   };
 
-  // Handle rate change for each commodity
-  const handleRateChange = (commodityId, value) => {
-    setRates((prevRates) => ({ ...prevRates, [commodityId]: value }));
+  const getRateValue = (
+    companyName,
+    entryIndex,
+    commodityIndex,
+    day,
+    defaultValue
+  ) => {
+    const key = `${companyName}-${entryIndex}-${commodityIndex}-${day}`;
+    return editableRates[key] !== undefined ? editableRates[key] : defaultValue;
   };
+
+  const handleUpdateRates = async (companyName) => {
+    const updates = [];
+    
+    Object.keys(editableRates).forEach((key) => {
+      if (key.startsWith(companyName)) {
+        const [_, entryIndex, commodityIndex, day] = key.split("-");
+        const updatedRate = editableRates[key];
+        updates.push({
+          entryIndex,
+          commodityIndex,
+          day,
+          rate: updatedRate,
+        });
+      }
+    });
+  
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/rate-entry/${companyName}`,
+        { updates }
+      );
+      console.log("Rates updated successfully:", response.data);
+      alert("Rates updated successfully!");
+    } catch (error) {
+      console.error("Error updating rates:", error);
+      alert("Error updating rates.");
+    }
+  };
+  
 
   return (
-    <div className="p-6 max-w-lg mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Select Company (multiple select) */}
-        <div>
-          <label className="block mb-2 text-sm font-medium">
-            Select Company
-          </label>
-          <Select
-            isMulti
-            options={companies.map((company) => ({
-              value: company._id,
-              label: company.companyName,
-            }))}
-            value={selectedCompany}
-            onChange={setSelectedCompany}
-            className="w-full"
-          />
+    <div className="container mx-auto p-6">
+      <h1 className="text-xl font-bold mb-4">Weekly Rate Table</h1>
+
+      <Calendar
+        onChange={setStartDate}
+        value={startDate}
+        maxDetail="month"
+        minDetail="month"
+      />
+
+      {Object.keys(groupedData).map((companyName) => (
+        <div key={companyName} className="mb-6">
+          <h2 className="text-lg font-semibold mb-2">
+            {companyName} -{" "}
+            {groupedData[companyName][0]?.location?.[0] || "N/A"}
+          </h2>
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              <tr>
+                <th className="border p-2">Sl. No</th>
+                <th className="border p-2">Commodity</th>
+                {weekDays.map((day, index) => (
+                  <th key={index} className="border p-2">
+                    {new Date(day).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {groupedData[companyName].map((entry, entryIndex) =>
+                entry.commodities.map((commodity, commodityIndex) => (
+                  <tr key={`${entryIndex}-${commodityIndex}`}>
+                    {commodityIndex === 0 && (
+                      <td
+                        rowSpan={entry.commodities.length}
+                        className="border p-2 text-center"
+                      >
+                        {entryIndex + 1}
+                      </td>
+                    )}
+                    <td className="border p-2">{commodity.commodityName}</td>
+                    {weekDays.map((day, dayIndex) => (
+                      <td key={dayIndex} className="border p-2">
+                        <input
+                          type="text"
+                          value={getRateValue(
+                            companyName,
+                            entryIndex,
+                            commodityIndex,
+                            day,
+                            entry.date === day ? commodity.rate : "-"
+                          )}
+                          onChange={(e) =>
+                            handleRateChange(
+                              companyName,
+                              entryIndex,
+                              commodityIndex,
+                              day,
+                              e.target.value
+                            )
+                          }
+                          className="w-full p-2 border border-gray-300"
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          <button
+            onClick={() => handleUpdateRates(companyName)}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Update {companyName} Rates
+          </button>
         </div>
-
-        {/* Select Location */}
-        <div>
-          <label className="block mb-2 text-sm font-medium">
-            Select Location
-          </label>
-          <Select
-            isMulti
-            options={locations.map((location) => ({
-              value: location._id,
-              label: location.locationName,
-            }))}
-            value={selectedLocation}
-            onChange={setSelectedLocation}
-            className="w-full"
-          />
-        </div>
-
-        {/* Select Date */}
-        <div>
-          <label className="block mb-2 text-sm font-medium">Select Date</label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full p-2 border rounded"
-          />
-        </div>
-
-        {/* Select Commodity (multiple select) */}
-        <div>
-          <label className="block mb-2 text-sm font-medium">
-            Select Commodity
-          </label>
-          <Select
-            isMulti
-            options={commodities.map((commodity) => ({
-              value: commodity._id,
-              label: commodity.commodityName,
-            }))}
-            value={selectedCommodity}
-            onChange={setSelectedCommodity}
-            className="w-full"
-          />
-        </div>
-
-        {/* Rate Input for each selected commodity */}
-        {selectedCommodity.length > 0 &&
-          selectedCommodity.map((commodity) => (
-            <div key={commodity.value}>
-              <label className="block mb-2 text-sm font-medium">
-                Enter Rate for {commodity.label}
-              </label>
-              <input
-                type="text"
-                placeholder={`Enter rate for ${commodity.label}`}
-                value={rates[commodity.value] || ""}
-                onChange={(e) =>
-                  handleRateChange(commodity.value, e.target.value)
-                }
-                className="w-full p-2 border rounded"
-              />
-            </div>
-          ))}
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Submit
-        </button>
-      </form>
+      ))}
     </div>
   );
 };

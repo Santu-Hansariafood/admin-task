@@ -32,25 +32,21 @@ const AddRate = () => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-
+  
     const formData = {
-      company: selectedCompany.map((company) => company.label), // Use name instead of ID
+      company: selectedCompany.map((company) => company.label), // Use company names
       date: selectedDate,
       commodities: selectedCommodity.map((commodity) => ({
-        commodityName: commodity.label, // Use name instead of ID
-        rate: rates[commodity.value],
+        commodityName: commodity.label, // Use commodity names
+        rate: rates[commodity.value], // Use rates for each commodity
       })),
-      location: selectedLocation.map((location) => location.label), // Use name instead of ID
+      location: selectedLocation.map((location) => location.label), // Use location names
     };
-
-    // Make the API call to submit the data
+  
     axios
       .post("http://localhost:5000/api/rate-entry", formData)
       .then((response) => {
-        console.log("Data submitted successfully", response.data);
         toast.success("Data submitted successfully!");
-
-        // Clear form data after successful submission
         setSelectedCompany([]);
         setSelectedDate(new Date().toISOString().split("T")[0]);
         setSelectedCommodity([]);
@@ -58,11 +54,10 @@ const AddRate = () => {
         setRates({});
       })
       .catch((error) => {
-        console.error("Error submitting data", error);
-        toast.error("Error submitting data. Please try again.");
+        toast.error("Error submitting data.");
       });
   };
-
+  
   // Handle rate change for each commodity
   const handleRateChange = (commodityId, value) => {
     setRates((prevRates) => ({ ...prevRates, [commodityId]: value }));
