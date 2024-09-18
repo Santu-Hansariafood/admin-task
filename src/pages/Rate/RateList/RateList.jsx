@@ -16,7 +16,9 @@ const RateList = () => {
     for (let i = 0; i < 7; i++) {
       const currentDay = new Date(start);
       currentDay.setDate(start.getDate() + i);
-      days.push(currentDay.toISOString().split("T")[0]);
+      const formattedDate = currentDay.toISOString().split("T")[0];
+      days.push(formattedDate);
+      console.log("Generated date:", formattedDate);
     }
 
     return days;
@@ -54,6 +56,7 @@ const RateList = () => {
     day,
     newRate
   ) => {
+    console.log("handleRateChange - Day:", day);
     setEditableRates((prevRates) => ({
       ...prevRates,
       [`${companyName}-${entryIndex}-${commodityIndex}-${day}`]: newRate,
@@ -76,7 +79,12 @@ const RateList = () => {
 
     Object.keys(editableRates).forEach((key) => {
       if (key.startsWith(companyName)) {
-        const [_, entryIndex, commodityIndex, date] = key.split("-"); // This date should already be in YYYY-MM-DD format
+        const [_, entryIndex, commodityIndex, ...dateParts] = key.split("-");
+
+        const date = dateParts.join("-");
+
+        console.log("Date in update payload:", date);
+
         const updatedRate = editableRates[key];
 
         if (updatedRate !== "-") {
