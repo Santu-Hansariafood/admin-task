@@ -1,26 +1,15 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import "../../App.css";
 
-const HomePage = () => {
+const RateEntryTable = () => {
   const [rateData, setRateData] = useState([]);
-  const [startDate, setStartDate] = useState(new Date());
-  const [weekDays, setWeekDays] = useState([]);
-  const [editableRates, setEditableRates] = useState({});
-
-  const getWeekDays = (date) => {
-    const start = new Date(date);
-    const days = [];
-
-    for (let i = 0; i < 7; i++) {
-      const currentDay = new Date(start);
-      currentDay.setDate(start.getDate() + i);
-      days.push(currentDay.toISOString().split("T")[0]);
-    }
-
-    return days;
-  };
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [datesInRange, setDatesInRange] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
@@ -29,164 +18,122 @@ const HomePage = () => {
         setRateData(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching rate data", error);
+        console.error(
+          "There was an error fetching the rate entry data!",
+          error
+        );
       });
   }, []);
 
-  useEffect(() => {
-    setWeekDays(getWeekDays(startDate));
-  }, [startDate]);
-
-  const groupedData = rateData.reduce((acc, entry) => {
-    entry.company.forEach((company) => {
-      if (!acc[company]) {
-        acc[company] = [];
-      }
-      acc[company].push(entry);
-    });
-    return acc;
-  }, {});
-
-  const handleRateChange = (
-    companyName,
-    entryIndex,
-    commodityIndex,
-    day,
-    newRate
-  ) => {
-    setEditableRates((prevRates) => ({
-      ...prevRates,
-      [`${companyName}-${entryIndex}-${commodityIndex}-${day}`]: newRate,
-    }));
+  const getDatesInRange = (startDate) => {
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + i);
+      dates.push(date.toISOString().split("T")[0]);
+    }
+    setDatesInRange(dates);
   };
 
-  const getRateValue = (
-    companyName,
-    entryIndex,
-    commodityIndex,
-    day,
-    defaultValue
-  ) => {
-    const key = `${companyName}-${entryIndex}-${commodityIndex}-${day}`;
-    return editableRates[key] !== undefined ? editableRates[key] : defaultValue;
+  const onDateChange = (date) => {
+    setSelectedDate(date);
+    getDatesInRange(date);
   };
 
-  const handleUpdateRates = async (companyName) => {
-    const updates = [];
-    
-    Object.keys(editableRates).forEach((key) => {
-      if (key.startsWith(companyName)) {
-        const [_, entryIndex, commodityIndex, day] = key.split("-");
-        const updatedRate = editableRates[key];
-        updates.push({
-          entryIndex,
-          commodityIndex,
-          day,
-          rate: updatedRate,
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Rate Entry Data",
+          text: "Check out the latest rate entry data!",
+          url: window.location.href,
         });
+        console.log("Data shared successfully");
+      } catch (error) {
+        console.error("Error sharing data:", error);
       }
-    });
-  
-    try {
-      const response = await axios.put(
-        `http://localhost:5000/api/rate-entry/${companyName}`,
-        { updates }
-      );
-      console.log("Rates updated successfully:", response.data);
-      alert("Rates updated successfully!");
-    } catch (error) {
-      console.error("Error updating rates:", error);
-      alert("Error updating rates.");
+    } else {
+      alert("Web Share API is not supported in your browser.");
     }
   };
-  
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-xl font-bold mb-4">Weekly Rate Table</h1>
+    <div className="container mx-auto p-4">
+      <div className="flex justify-between mb-4 no-print">
+        <button
+          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700"
+          onClick={() => navigate(-1)}
+        >
+          Back
+        </button>
+        <button
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+          onClick={() => navigate("/rate/list")}
+        >
+          Add Rate Entry
+        </button>
+      </div>
+      <div className="mb-4 no-print">
+        <Calendar onChange={onDateChange} value={selectedDate} />
+      </div>
 
-      <Calendar
-        onChange={setStartDate}
-        value={startDate}
-        maxDetail="month"
-        minDetail="month"
-      />
-
-      {Object.keys(groupedData).map((companyName) => (
-        <div key={companyName} className="mb-6">
-          <h2 className="text-lg font-semibold mb-2">
-            {companyName} -{" "}
-            {groupedData[companyName][0]?.location?.[0] || "N/A"}
-          </h2>
-          <table className="w-full border-collapse border border-gray-300">
-            <thead>
-              <tr>
-                <th className="border p-2">Sl. No</th>
-                <th className="border p-2">Commodity</th>
-                {weekDays.map((day, index) => (
-                  <th key={index} className="border p-2">
-                    {new Date(day).toLocaleDateString("en-US", {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "short",
-                    })}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {groupedData[companyName].map((entry, entryIndex) =>
-                entry.commodities.map((commodity, commodityIndex) => (
-                  <tr key={`${entryIndex}-${commodityIndex}`}>
-                    {commodityIndex === 0 && (
-                      <td
-                        rowSpan={entry.commodities.length}
-                        className="border p-2 text-center"
-                      >
-                        {entryIndex + 1}
+      <div className="overflow-x-auto">
+        <table className="table-auto w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="border p-2">Company Name</th>
+              <th className="border p-2">Commodity</th>
+              <th className="border p-2">Location</th>
+              {datesInRange.map((date, index) => (
+                <th className="border p-2" key={index}>
+                  {date}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rateData.map((entry, entryIndex) =>
+              entry.commodities.map((commodity, commodityIndex) => (
+                <tr key={`${entryIndex}-${commodityIndex}`}>
+                  <td className="border p-2">{entry.company.join(", ")}</td>
+                  <td className="border p-2">{commodity.commodityName}</td>
+                  <td className="border p-2">{entry.location.join(", ")}</td>
+                  {datesInRange.map((date, dateIndex) => {
+                    const rateForDate = commodity.rates.find(
+                      (rate) => rate.date === date
+                    );
+                    return (
+                      <td className="border p-2" key={dateIndex}>
+                        {rateForDate ? rateForDate.rate : "N/A"}
                       </td>
-                    )}
-                    <td className="border p-2">{commodity.commodityName}</td>
-                    {weekDays.map((day, dayIndex) => (
-                      <td key={dayIndex} className="border p-2">
-                        <input
-                          type="text"
-                          value={getRateValue(
-                            companyName,
-                            entryIndex,
-                            commodityIndex,
-                            day,
-                            entry.date === day ? commodity.rate : "-"
-                          )}
-                          onChange={(e) =>
-                            handleRateChange(
-                              companyName,
-                              entryIndex,
-                              commodityIndex,
-                              day,
-                              e.target.value
-                            )
-                          }
-                          className="w-full p-2 border border-gray-300"
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-
-          <button
-            onClick={() => handleUpdateRates(companyName)}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-          >
-            Update {companyName} Rates
-          </button>
-        </div>
-      ))}
+                    );
+                  })}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex justify-between mt-4 no-print">
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+          onClick={handlePrint}
+        >
+          Print
+        </button>
+        <button
+          className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-700"
+          onClick={handleShare}
+        >
+          Share
+        </button>
+      </div>
     </div>
   );
 };
 
-export default HomePage;
+export default RateEntryTable;
