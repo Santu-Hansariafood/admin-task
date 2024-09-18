@@ -9,19 +9,22 @@ const RateEntryTable = () => {
   const [rateData, setRateData] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [datesInRange, setDatesInRange] = useState([]);
+  const [showCalendar, setShowCalendar] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/rate-entry")
       .then((response) => {
-        setRateData(response.data);
+        const sortedData = response.data.sort((a, b) => {
+          const companyA = a.company.join(", ").toLowerCase();
+          const companyB = b.company.join(", ").toLowerCase();
+          return companyA.localeCompare(companyB);
+        });
+        setRateData(sortedData);
       })
       .catch((error) => {
-        console.error(
-          "There was an error fetching the rate entry data!",
-          error
-        );
+        console.error("Error fetching the rate entry data!", error);
       });
   }, []);
 
@@ -38,6 +41,15 @@ const RateEntryTable = () => {
   const onDateChange = (date) => {
     setSelectedDate(date);
     getDatesInRange(date);
+    setShowCalendar(false);
+  };
+
+  const extractState = (locationString) => {
+    const locationParts = locationString.split(",");
+    if (locationParts.length > 2) {
+      return locationParts[1].trim();
+    }
+    return "";
   };
 
   const handlePrint = () => {
@@ -62,7 +74,7 @@ const RateEntryTable = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 bg-gray-50">
       <div className="flex justify-between mb-4 no-print">
         <button
           className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700"
@@ -72,22 +84,33 @@ const RateEntryTable = () => {
         </button>
         <button
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
-          onClick={() => navigate("/rate/list")}
+          onClick={() => navigate("/add-rate-entry")}
         >
           Add Rate Entry
         </button>
       </div>
+
       <div className="mb-4 no-print">
-        <Calendar onChange={onDateChange} value={selectedDate} />
+        {!showCalendar ? (
+          <div
+            className="bg-white border p-2 rounded cursor-pointer text-center w-40"
+            onClick={() => setShowCalendar(true)}
+          >
+            {selectedDate.toDateString()}
+          </div>
+        ) : (
+          <Calendar onChange={onDateChange} value={selectedDate} />
+        )}
       </div>
 
       <div className="overflow-x-auto">
-        <table className="table-auto w-full border-collapse">
+        <table className="table-auto w-full border-collapse text-left">
           <thead>
-            <tr>
+            <tr className="bg-blue-500 text-white">
               <th className="border p-2">Company Name</th>
               <th className="border p-2">Commodity</th>
               <th className="border p-2">Location</th>
+              <th className="border p-2">State</th>
               {datesInRange.map((date, index) => (
                 <th className="border p-2" key={index}>
                   {date}
@@ -98,10 +121,23 @@ const RateEntryTable = () => {
           <tbody>
             {rateData.map((entry, entryIndex) =>
               entry.commodities.map((commodity, commodityIndex) => (
-                <tr key={`${entryIndex}-${commodityIndex}`}>
+                <tr
+                  key={`${entryIndex}-${commodityIndex}`}
+                  className={
+                    commodityIndex % 2 === 0 ? "bg-gray-100" : "bg-white"
+                  }
+                >
                   <td className="border p-2">{entry.company.join(", ")}</td>
                   <td className="border p-2">{commodity.commodityName}</td>
-                  <td className="border p-2">{entry.location.join(", ")}</td>
+                  {entry.location.map((loc, locIndex) => {
+                    const locationParts = loc.split(",");
+                    return (
+                      <React.Fragment key={locIndex}>
+                        <td className="border p-2">{locationParts[0]}</td>
+                        <td className="border p-2">{extractState(loc)}</td>
+                      </React.Fragment>
+                    );
+                  })}
                   {datesInRange.map((date, dateIndex) => {
                     const rateForDate = commodity.rates.find(
                       (rate) => rate.date === date
@@ -118,6 +154,7 @@ const RateEntryTable = () => {
           </tbody>
         </table>
       </div>
+
       <div className="flex justify-between mt-4 no-print">
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
