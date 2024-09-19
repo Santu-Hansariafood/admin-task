@@ -47,7 +47,7 @@ const RateEntryTable = () => {
   const extractState = (locationString) => {
     const locationParts = locationString.split(",");
     if (locationParts.length > 2) {
-      return locationParts[1].trim();
+      return locationParts[2].trim();
     }
     return "";
   };
