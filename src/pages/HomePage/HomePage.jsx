@@ -14,7 +14,7 @@ const RateEntryTable = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/rate-entry")
+      .get("https://hansaria-admin-production.up.railway.app/api/rate-entry")
       .then((response) => {
         const sortedData = response.data.sort((a, b) => {
           const companyA = a.company.join(", ").toLowerCase();
@@ -84,7 +84,7 @@ const RateEntryTable = () => {
         </button>
         <button
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
-          onClick={() => navigate("/add-rate-entry")}
+          onClick={() => navigate("/rate/add")}
         >
           Add Rate Entry
         </button>
@@ -144,7 +144,7 @@ const RateEntryTable = () => {
                     );
                     return (
                       <td className="border p-2" key={dateIndex}>
-                        {rateForDate ? rateForDate.rate : "N/A"}
+                        {rateForDate ? rateForDate.rate : "--"}
                       </td>
                     );
                   })}

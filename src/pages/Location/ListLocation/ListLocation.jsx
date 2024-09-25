@@ -9,7 +9,7 @@ const ListLocation = () => {
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/locations");
+        const response = await axios.get("https://hansaria-admin-production.up.railway.app/api/locations");
         setLocations(response.data); // Assuming the response is directly the array of locations
       } catch (error) {
         console.error("Error fetching locations:", error);

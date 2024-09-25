@@ -20,7 +20,7 @@ const AddPurchaser = () => {
     const fetchCommodities = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/commodities"
+          "https://hansaria-admin-production.up.railway.app/api/commodities"
         );
         setCommodities(response.data);
       } catch (error) {
@@ -32,7 +32,7 @@ const AddPurchaser = () => {
     const fetchCompanies = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/company-profile"
+          "https://hansaria-admin-production.up.railway.app/api/company-profile"
         );
         setCompanies(response.data);
       } catch (error) {
@@ -43,7 +43,7 @@ const AddPurchaser = () => {
 
     const fetchLocations = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/locations");
+        const response = await axios.get("https://hansaria-admin-production.up.railway.app/api/locations");
         setLocations(response.data);
       } catch (error) {
         console.error("Error fetching locations:", error);
@@ -69,7 +69,7 @@ const AddPurchaser = () => {
     try {
       console.log("Sending request with data:", formData);
       const response = await axios.post(
-        "http://localhost:5000/api/purchasers",
+        "https://hansaria-admin-production.up.railway.app/api/purchasers",
         formData
       );
 

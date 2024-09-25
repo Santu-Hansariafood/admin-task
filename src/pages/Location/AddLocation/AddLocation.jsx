@@ -21,7 +21,7 @@ const AddLocation = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/locations",
+        "https://hansaria-admin-production.up.railway.app/api/locations",
         locationData
       );
 

@@ -8,7 +8,7 @@ const BuyerList = () => {
   useEffect(() => {
     const fetchBuyers = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/buyers');
+        const response = await axios.get('https://hansaria-admin-production.up.railway.app/api/buyers');
         setBuyers(response.data);
       } catch (error) {
         console.error('Error fetching buyers data:', error);

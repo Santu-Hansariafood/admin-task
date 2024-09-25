@@ -17,7 +17,7 @@ const AddBuyer = () => {
     const fetchGroupOfCompanies = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/group-of-company"
+          "https://hansaria-admin-production.up.railway.app/api/group-of-company"
         );
         setGroupOfCompanies(response.data.data); // Update to access data correctly
       } catch (error) {
@@ -53,7 +53,7 @@ const AddBuyer = () => {
     };
 
     try {
-      await axios.post("http://localhost:5000/api/buyers", buyerData);
+      await axios.post("https://hansaria-admin-production.up.railway.app/api/buyers", buyerData);
       toast.success("Buyer added successfully!");
       // Resetting the form after submission
       setName("");

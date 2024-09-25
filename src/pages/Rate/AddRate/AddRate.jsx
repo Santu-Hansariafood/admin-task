@@ -18,13 +18,13 @@ const AddRate = () => {
 
   // Fetch companies, commodities, and locations from the API
   useEffect(() => {
-    axios.get("http://localhost:5000/api/company-profile").then((response) => {
+    axios.get("https://hansaria-admin-production.up.railway.app/api/company-profile").then((response) => {
       setCompanies(response.data);
     });
-    axios.get("http://localhost:5000/api/commodities").then((response) => {
+    axios.get("https://hansaria-admin-production.up.railway.app/api/commodities").then((response) => {
       setCommodities(response.data);
     });
-    axios.get("http://localhost:5000/api/locations").then((response) => {
+    axios.get("https://hansaria-admin-production.up.railway.app/api/locations").then((response) => {
       setLocations(response.data);
     });
   }, []);
@@ -44,7 +44,7 @@ const AddRate = () => {
     };
   
     axios
-      .post("http://localhost:5000/api/rate-entry", formData)
+      .post("https://hansaria-admin-production.up.railway.app/api/rate-entry", formData)
       .then((response) => {
         toast.success("Data submitted successfully!");
         setSelectedCompany([]);

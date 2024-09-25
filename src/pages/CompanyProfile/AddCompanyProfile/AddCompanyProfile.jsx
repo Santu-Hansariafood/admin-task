@@ -18,7 +18,7 @@ const AddCompanyProfile = () => {
     const fetchGroupOptions = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/group-of-company"
+          "https://hansaria-admin-production.up.railway.app/api/group-of-company"
         );
         setGroupOptions(response.data.data);
       } catch (error) {
@@ -31,7 +31,7 @@ const AddCompanyProfile = () => {
   useEffect(() => {
     const fetchLocationOptions = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/locations");
+        const response = await axios.get("https://hansaria-admin-production.up.railway.app/api/locations");
         // Format the locations for react-select
         const formattedLocations = response.data.map((location) => ({
           value: location._id,
@@ -70,7 +70,7 @@ const AddCompanyProfile = () => {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/company-profile",
+        "https://hansaria-admin-production.up.railway.app/api/company-profile",
         companyProfileData
       );
       toast.success("Company profile added successfully!");

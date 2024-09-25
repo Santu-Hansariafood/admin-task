@@ -8,7 +8,7 @@ const ListGroupofCompany = () => {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/group-of-company');
+        const response = await axios.get('https://hansaria-admin-production.up.railway.app/api/group-of-company');
         setCompanies(response.data.data); // Accessing the data field from response
       } catch (error) {
         console.error('Error fetching companies:', error);

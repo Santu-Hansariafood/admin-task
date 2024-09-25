@@ -8,7 +8,7 @@ const CommodityList = () => {
   useEffect(() => {
     const fetchCommodities = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/commodities');
+        const response = await axios.get('https://hansaria-admin-production.up.railway.app/api/commodities');
         setCommodities(response.data);
       } catch (error) {
         console.error('Error fetching commodities:', error);

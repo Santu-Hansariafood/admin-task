@@ -26,7 +26,7 @@ const RateList = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/rate-entry")
+      .get("https://hansaria-admin-production.up.railway.app/api/rate-entry")
       .then((response) => {
         setRateData(response.data);
       })
@@ -100,7 +100,7 @@ const RateList = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/rate-entry/${companyName}`,
+        `https://hansaria-admin-production.up.railway.app/api/rate-entry/${companyName}`,
         { updates }
       );
       console.log("Rates updated successfully:", response.data);

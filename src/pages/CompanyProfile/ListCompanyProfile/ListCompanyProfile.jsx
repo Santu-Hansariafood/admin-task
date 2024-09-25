@@ -8,7 +8,7 @@ const CompanyProfile = () => {
   useEffect(() => {
     const fetchCompanyProfiles = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/company-profile');
+        const response = await fetch('https://hansaria-admin-production.up.railway.app/api/company-profile');
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }

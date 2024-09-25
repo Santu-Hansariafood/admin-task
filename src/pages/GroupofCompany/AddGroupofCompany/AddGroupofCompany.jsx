@@ -15,7 +15,7 @@ const AddGroupofCompany = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/group-of-company",
+        "https://hansaria-admin-production.up.railway.app/api/group-of-company",
         { name: groupName }
       );
       toast.success("Group of Company added successfully!");

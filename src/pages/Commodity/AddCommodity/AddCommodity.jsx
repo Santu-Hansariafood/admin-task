@@ -10,7 +10,7 @@ const AddCommodity = () => {
     if (commodityName) {
       try {
         const response = await axios.post(
-          "http://localhost:5000/api/commodities",
+          "https://hansaria-admin-production.up.railway.app/api/commodities",
           {
             commodityName,
           }
